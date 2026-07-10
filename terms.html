@@ -5,18 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conditions d'utilisation - SheetToCsv Premium</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
             color: #333;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #fff;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .logo {
+            height: 60px;
+            width: auto;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 5px;
         }
         h1 {
             color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
+            border: none;
+            padding: 0;
+            margin: 0;
         }
         h2 {
             color: #34495e;
@@ -35,64 +59,70 @@
     </style>
 </head>
 <body>
-    <h1>Conditions d'utilisation</h1>
-    <p class="last-updated">Dernière mise à jour : <span id="date"></span></p>
+    <header>
+        <h1>Conditions d'utilisation</h1>
+        <img src="https://raw.githubusercontent.com/Larose75-precogn/SheetToCsv/main/logo.png" alt="Structory Logo" class="logo">
+    </header>
 
-    <h2>1. Acceptation des conditions</h2>
-    <p>En utilisant SheetToCsv Premium de Structory("l'Add-on"), vous acceptez pleinement ces conditions. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser l'Add-on.</p>
+    <div class="container">
+        <p class="last-updated">Dernière mise à jour : <span id="date"></span></p>
 
-    <h2>2. Description du service</h2>
-    <p>SheetToCsv Premium est un add-on pour Google Sheets qui permet d'exporter une ou plusieurs feuilles de calcul au format CSV. Le service est disponible en version d'essai et en version premium payante.</p>
+        <h2>1. Acceptation des conditions</h2>
+        <p>En utilisant SheetToCsv Premium de Structory("l'Add-on"), vous acceptez pleinement ces conditions. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser l'Add-on.</p>
 
-    <h2>3. Licences et paiements</h2>
-    <div class="highlight">
-        <p><strong>🔓 Version d'essai</strong> : Période d'essai gratuite de 7 jours, limitée à 2 feuilles par conversion.</p>
-        <p><strong>⭐ Version Premium</strong> : Accès illimité via un abonnement payant géré par Stripe.</p>
-        <p><strong>💳 Paiements</strong> : Tous les paiements sont traités par Stripe. Aucune information bancaire n'est stockée par nos soins.</p>
+        <h2>2. Description du service</h2>
+        <p>SheetToCsv Premium est un add-on pour Google Sheets qui permet d'exporter une ou plusieurs feuilles de calcul au format CSV. Le service est disponible en version d'essai et en version premium payante.</p>
+
+        <h2>3. Licences et paiements</h2>
+        <div class="highlight">
+            <p><strong>🔓 Version d'essai</strong> : Période d'essai gratuite de 7 jours, limitée à 2 feuilles par conversion.</p>
+            <p><strong>⭐ Version Premium</strong> : Accès illimité via un abonnement payant géré par Stripe.</p>
+            <p><strong>💳 Paiements</strong> : Tous les paiements sont traités par Stripe. Aucune information bancaire n'est stockée par nos soins.</p>
+        </div>
+
+        <h2>4. Utilisation autorisée</h2>
+        <p>Vous vous engagez à utiliser l'Add-on uniquement à des fins légitimes. Vous ne devez pas :</p>
+        <ul>
+            <li>Utiliser l'Add-on à des fins illégales ou frauduleuses</li>
+            <li>Contourner les limitations de la version d'essai</li>
+            <li>Partager votre licence avec d'autres utilisateurs</li>
+            <li>Revendre ou redistribuer l'Add-on</li>
+            <li>Tenter de décompiler ou d'obtenir le code source</li>
+        </ul>
+
+        <h2>5. Propriété intellectuelle</h2>
+        <p>L'Add-on, son code source, son interface et son contenu sont protégés par les droits d'auteur. Vous ne pouvez pas :</p>
+        <ul>
+            <li>Copier ou modifier l'Add-on</li>
+            <li>Créer des œuvres dérivées</li>
+            <li>Utiliser le nom "SheetToCsv Premium" sans autorisation</li>
+        </ul>
+
+        <h2>6. Limitation de responsabilité</h2>
+        <p>L'Add-on est fourni "tel quel", sans garantie d'aucune sorte. Nous ne sommes pas responsables de :</p>
+        <ul>
+            <li>La perte ou la corruption de données</li>
+            <li>Les interruptions de service</li>
+            <li>Les dommages indirects ou consécutifs</li>
+            <li>Les erreurs dans les fichiers CSV générés</li>
+        </ul>
+
+        <h2>7. Résiliation</h2>
+        <p>Nous nous réservons le droit de suspendre ou de résilier votre accès à l'Add-on si vous enfreignez ces conditions. En cas de résiliation, vous perdrez l'accès aux fonctionnalités Premium.</p>
+
+        <h2>8. Modifications des conditions</h2>
+        <p>Nous pouvons modifier ces conditions à tout moment. Les modifications prendront effet dès leur publication. Nous vous informerons des modifications importantes par email.</p>
+
+        <h2>9. Loi applicable</h2>
+        <p>Ces conditions sont régies par le droit français. Tout litige sera soumis aux tribunaux compétents.</p>
+
+        <h2>10. Contact</h2>
+        <p>Pour toute question concernant ces conditions, contactez-nous à :</p>
+        <p><strong>Email</strong> : <a href="mailto:larose75@9l9.org">larose75@9l9.org</a></p>
+
+        <hr style="margin-top: 30px; margin-bottom: 20px;">
+        <p style="text-align: center;"><strong>En utilisant SheetToCsv Premium, vous acceptez ces conditions d'utilisation.</strong></p>
     </div>
-
-    <h2>4. Utilisation autorisée</h2>
-    <p>Vous vous engagez à utiliser l'Add-on uniquement à des fins légitimes. Vous ne devez pas :</p>
-    <ul>
-        <li>Utiliser l'Add-on à des fins illégales ou frauduleuses</li>
-        <li>Contourner les limitations de la version d'essai</li>
-        <li>Partager votre licence avec d'autres utilisateurs</li>
-        <li>Revendre ou redistribuer l'Add-on</li>
-        <li>Tenter de décompiler ou d'obtenir le code source</li>
-    </ul>
-
-    <h2>5. Propriété intellectuelle</h2>
-    <p>L'Add-on, son code source, son interface et son contenu sont protégés par les droits d'auteur. Vous ne pouvez pas :</p>
-    <ul>
-        <li>Copier ou modifier l'Add-on</li>
-        <li>Créer des œuvres dérivées</li>
-        <li>Utiliser le nom "SheetToCsv Premium" sans autorisation</li>
-    </ul>
-
-    <h2>6. Limitation de responsabilité</h2>
-    <p>L'Add-on est fourni "tel quel", sans garantie d'aucune sorte. Nous ne sommes pas responsables de :</p>
-    <ul>
-        <li>La perte ou la corruption de données</li>
-        <li>Les interruptions de service</li>
-        <li>Les dommages indirects ou consécutifs</li>
-        <li>Les erreurs dans les fichiers CSV générés</li>
-    </ul>
-
-    <h2>7. Résiliation</h2>
-    <p>Nous nous réservons le droit de suspendre ou de résilier votre accès à l'Add-on si vous enfreignez ces conditions. En cas de résiliation, vous perdrez l'accès aux fonctionnalités Premium.</p>
-
-    <h2>8. Modifications des conditions</h2>
-    <p>Nous pouvons modifier ces conditions à tout moment. Les modifications prendront effet dès leur publication. Nous vous informerons des modifications importantes par email.</p>
-
-    <h2>9. Loi applicable</h2>
-    <p>Ces conditions sont régies par le droit français. Tout litige sera soumis aux tribunaux compétents.</p>
-
-    <h2>10. Contact</h2>
-    <p>Pour toute question concernant ces conditions, contactez-nous à :</p>
-    <p><strong>Email</strong> : <a href="mailto:larose75@9l9.org">larose75@9l9.org</a></p>
-
-    <hr>
-    <p style="text-align: center;"><strong>En utilisant SheetToCsv Premium, vous acceptez ces conditions d'utilisation.</strong></p>
 
     <script>
         document.getElementById('date').textContent = new Date().toLocaleDateString('fr-FR', {
