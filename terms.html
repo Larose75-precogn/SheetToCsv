@@ -30,9 +30,19 @@
             flex: 1;
         }
         .logo {
-            height: 70px;
-            width: auto;
-            margin-left: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #FF8C00;
+            letter-spacing: 2px;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            51%, 100% {
+                opacity: 0.3;
+            }
         }
         .container {
             max-width: 900px;
@@ -85,7 +95,7 @@
 <body>
     <header>
         <h1>Conditions d'utilisation</h1>
-        <img src="https://raw.githubusercontent.com/Larose75-precogn/SheetToCsv/main/logo.svg" alt="Structory Logo" class="logo">
+        <div class="logo">STRUCTORY</div>
     </header>
 
     <div class="container">
