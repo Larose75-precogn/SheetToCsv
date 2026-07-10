@@ -1,27 +1,50 @@
-<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+<svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#333;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    <linearGradient id="structoryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B00;stop-opacity:1" />
     </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
   </defs>
   
-  <!-- Cube 3D simplifié -->
-  <!-- Top face -->
-  <polygon points="30,20 60,10 70,20 40,30" fill="#555" stroke="#333" stroke-width="1"/>
+  <!-- 3D Cube principale -->
+  <!-- Top face (top) -->
+  <polygon points="40,45 65,30 90,45 65,60" fill="#4A4A4A" stroke="#2A2A2A" stroke-width="0.5"/>
   
-  <!-- Left face -->
-  <polygon points="30,20 40,30 40,55 30,50" fill="#333" stroke="#333" stroke-width="1"/>
+  <!-- Front face (left) -->
+  <polygon points="40,45 65,60 65,100 40,85" fill="#2A2A2A" stroke="#1A1A1A" stroke-width="0.5"/>
   
   <!-- Right face -->
-  <polygon points="70,20 80,30 80,55 70,50" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+  <polygon points="90,45 115,30 115,70 90,85" fill="#1A1A1A" stroke="#0A0A0A" stroke-width="0.5"/>
   
-  <!-- Orange curved shape inside -->
-  <ellipse cx="55" cy="40" rx="18" ry="15" fill="#ff8c00" opacity="0.9"/>
-  <path d="M 45 35 Q 50 30 60 32 L 60 48 Q 50 50 45 45" fill="#ff9f1c" opacity="0.85"/>
+  <!-- Front right face -->
+  <polygon points="65,100 90,85 115,70 115,105" fill="#0A0A0A" stroke="#000000" stroke-width="0.5"/>
+  
+  <!-- Highlight on top -->
+  <polygon points="45,48 60,40 75,48 60,56" fill="#FFFFFF" opacity="0.2"/>
+  
+  <!-- Orange/Red curved flow inside cube -->
+  <!-- Top curve -->
+  <path d="M 50 65 Q 65 50 80 65" stroke="url(#structoryGradient)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#shadow)"/>
+  
+  <!-- Middle curves -->
+  <path d="M 50 75 Q 65 65 80 75" stroke="url(#structoryGradient)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#shadow)"/>
+  
+  <!-- Bottom curve -->
+  <path d="M 50 85 Q 65 75 80 85" stroke="url(#structoryGradient)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#shadow)"/>
+  
+  <!-- Connection dots -->
+  <circle cx="50" cy="65" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
+  <circle cx="50" cy="75" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
+  <circle cx="50" cy="85" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
+  <circle cx="80" cy="65" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
+  <circle cx="80" cy="75" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
+  <circle cx="80" cy="85" r="3" fill="url(#structoryGradient)" filter="url(#shadow)"/>
   
   <!-- Text: STRUCTORY -->
-  <text x="95" y="48" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#333" letter-spacing="1">
+  <text x="145" y="75" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="bold" fill="#2A2A2A" letter-spacing="0">
     STRUCTORY
   </text>
 </svg>
