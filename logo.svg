@@ -1,0 +1,59 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#0a0e27"/>
+  
+  <!-- 3D Cube -->
+  <defs>
+    <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cubeFront" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3748;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a202c;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cubeSide" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a202c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f1419;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="5" dy="5" stdDeviation="10" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Cube Top -->
+  <polygon points="200,200 350,120 500,200 350,280" fill="url(#cubeTop)" filter="url(#shadow)"/>
+  
+  <!-- Cube Front -->
+  <polygon points="200,200 350,280 350,430 200,350" fill="url(#cubeFront)"/>
+  
+  <!-- Cube Right Side -->
+  <polygon points="350,280 500,200 500,350 350,430" fill="url(#cubeSide)"/>
+  
+  <!-- Orange Curved Shape (Inside) -->
+  <g>
+    <!-- Left curved part -->
+    <path d="M 250 280 Q 280 320 280 370 L 280 380 Q 280 400 260 410 L 240 400 Q 260 380 260 350 Q 260 310 240 280 Z" 
+          fill="#ff8c00" opacity="0.9"/>
+    
+    <!-- Right curved part -->
+    <path d="M 370 280 Q 350 310 350 350 Q 350 380 370 410 L 390 400 Q 370 400 370 380 L 370 370 Q 370 320 400 280 Z" 
+          fill="#ff9f1c" opacity="0.95"/>
+    
+    <!-- Main curved connector -->
+    <ellipse cx="325" cy="345" rx="65" ry="50" fill="#ff8c00" opacity="0.85" transform="skewY(-15)"/>
+  </g>
+  
+  <!-- Highlight on cube -->
+  <polygon points="210,210 250,185 280,210 240,235" fill="#ffffff" opacity="0.15"/>
+  
+  <!-- Text: STRUCTORY -->
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ffffff" letter-spacing="8">
+    STRUCTORY
+  </text>
+  
+  <!-- Orange highlight on O -->
+  <text x="635" y="480" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ff8c00" letter-spacing="8">
+    O
+  </text>
+</svg>
