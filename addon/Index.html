@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SheetToCsv</title>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 28px;
+      padding: 32px 24px 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1e293b;
+      letter-spacing: -0.5px;
+    }
+
+    .badge {
+      background: #dbeafe;
+      color: #1e4a8b;
+      border-radius: 40px;
+      padding: 2px 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      margin: 0 0 16px;
+      padding: 10px 16px;
+      border-left: 4px solid #3b82f6;
+      background: #f8fafc;
+      border-radius: 0 12px 12px 0;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .privacy-note {
+      border-left-color: #16a34a;
+      background: #f0fdf4;
+      color: #14532d;
+      margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      background: #fafcff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      color: #0f172a;
+    }
+
+    .url-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+      background: white;
+    }
+
+    .url-input::placeholder { color: #94a3b8; }
+
+    .btn-convert {
+      width: 100%;
+      padding: 16px 28px;
+      background: #1e293b;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(30,41,59,0.25);
+    }
+
+    .btn-convert:hover:not(:disabled) {
+      background: #0f172a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(30,41,59,0.3);
+    }
+
+    .btn-convert:active:not(:disabled) { transform: scale(0.97); }
+
+    .btn-convert:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #status {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      min-height: 60px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-left: 4px solid #94a3b8;
+      background: #f1f5f9;
+      color: #0f172a;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    #status.info    { border-left-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
+    #status.success { border-left-color: #16a34a; background: #dcfce7; color: #14532d; }
+    #status.error   { border-left-color: #dc2626; background: #fee2e2; color: #7f1d1d; }
+
+    .download-btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 24px;
+      background: #1e293b;
+      color: white;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      border: none;
+      font-size: 0.95rem;
+    }
+
+    .download-btn:hover {
+      background: #0f172a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #e9edf3;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .footer span { margin: 0 6px; }
+
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px 20px; border-radius: 20px; }
+      .header h1 { font-size: 1.6rem; }
+      .url-input  { font-size: 0.95rem; padding: 12px 16px; }
+      .btn-convert { font-size: 1rem; padding: 14px 24px; }
+      #status { font-size: 0.9rem; padding: 14px 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .container  { padding: 20px 12px 16px; }
+      .header h1  { font-size: 1.4rem; }
+      .badge      { font-size: 0.6rem; padding: 1px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📄 SheetToCsv</h1>
+      <span class="badge">v2.0</span>
+    </div>
+
+    <div class="subtitle">
+      Convertissez toutes les feuilles d'un Google Sheet en un seul fichier CSV
+    </div>
+
+    <div class="subtitle privacy-note">
+      🔒 Vos données restent privées : à l'étape suivante, Google vous demandera de confirmer l'accès à <strong>ce fichier précis uniquement</strong> — l'application ne voit aucun autre document de votre Drive.
+    </div>
+
+    <div class="form-group">
+      <label for="sheetUrl">🔗 URL du Google Sheet</label>
+      <input
+        type="url"
+        id="sheetUrl"
+        class="url-input"
+        placeholder="https://docs.google.com/spreadsheets/d/..."
+        autocomplete="url"
+        spellcheck="false"
+      >
+    </div>
+
+    <button id="convertBtn" class="btn-convert">
+      <span>⚡</span> Convertir
+    </button>
+
+    <div id="status" class="info">
+      💡 Entrez l'URL d'un Google Sheet et cliquez sur Convertir.
+    </div>
+
+    <div class="footer">
+      <span>Standalone WebApp</span>
+      <span>·</span>
+      <span>structory</span>
+      <span>·</span>
+      <span>Add‑on compatible</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const PICKER_API_KEY = 'AIzaSyARbDCnqpIaX9wSW22390S5ZVcaXQJV-ZQ';
+
+      const statusEl  = document.getElementById('status');
+      const urlInput  = document.getElementById('sheetUrl');
+      const convertBtn = document.getElementById('convertBtn');
+
+      let pickerLoaded  = false;
+      let pendingFileId = null;
+      let currentBlobUrl = null; // URL objet du dernier CSV généré (pour révocation mémoire)
+
+      gapi.load('picker', function () { pickerLoaded = true; });
+
+      convertBtn.addEventListener('click', handleConvert);
+      urlInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); handleConvert(); }
+      });
+      urlInput.focus();
+
+      // ── Conversion ───────────────────────────────────────────────
+
+      function handleConvert() {
+        const url = urlInput.value.trim();
+
+        if (!url) {
+          setStatus('❌ Veuillez entrer l\'URL d\'un Google Sheet.', 'error');
+          return;
+        }
+        if (!url.includes('docs.google.com/spreadsheets/d/')) {
+          setStatus('❌ L\'URL ne semble pas être un Google Sheet valide.', 'error');
+          return;
+        }
+
+        const idMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (!idMatch) {
+          setStatus('❌ Impossible d\'identifier ce Google Sheet.', 'error');
+          return;
+        }
+
+        pendingFileId = idMatch[1];
+
+        if (!pickerLoaded) {
+          setStatus('⏳ Chargement en cours, réessayez dans un instant…', 'info');
+          return;
+        }
+
+        setLoading(true);
+        setStatus('🔐 Ouverture de la fenêtre de confirmation Google…', 'info');
+
+        google.script.run
+          .withSuccessHandler(openPicker)
+          .withFailureHandler(handleFailure)
+          .getOAuthToken();
+      }
+
+      // ── Picker ───────────────────────────────────────────────────
+
+      function openPicker(oauthToken) {
+        const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
+          .setMode(google.picker.DocsViewMode.LIST)
+          .setFileIds(pendingFileId);
+
+        const picker = new google.picker.PickerBuilder()
+          .addView(view)
+          .setOAuthToken(oauthToken)
+          .setDeveloperKey(PICKER_API_KEY)
+          .setOrigin(google.script.host.origin)
+          .setTitle('Confirmez le fichier à convertir')
+          .setCallback(pickerCallback)
+          .build();
+
+        picker.setVisible(true);
+      }
+
+      function pickerCallback(data) {
+        if (data.action === google.picker.Action.PICKED) {
+          if (!data.docs || !data.docs[0]) {
+            setLoading(false);
+            setStatus('❌ Aucun fichier sélectionné.', 'error');
+            return;
+          }
+          const pickedId  = data.docs[0].id;
+          const pickedUrl = 'https://docs.google.com/spreadsheets/d/' + pickedId;
+          setStatus('⏳ Traitement en cours… Veuillez patienter.', 'info');
+
+          google.script.run
+            .withSuccessHandler(handleSuccess)
+            .withFailureHandler(handleFailure)
+            .processSheet(pickedUrl);
+
+        } else if (data.action === google.picker.Action.CANCEL) {
+          setLoading(false);
+          setStatus('💡 Sélection annulée. Entrez l\'URL d\'un Google Sheet et cliquez sur Convertir.', 'info');
+
+        } else {
+          // Action inattendue (fermeture externe, erreur Picker, etc.)
+          setLoading(false);
+        }
+      }
+
+      // ── Résultats ─────────────────────────────────────────────────
+
+      function handleSuccess(result) {
+        setLoading(false);
+
+        if (result && result.success) {
+          const message =
+            '✅ Conversion réussie !\n\n' +
+            `📊 Feuilles traitées : ${result.sheetCount || 0}\n` +
+            `📝 Lignes exportées : ${result.rowCount || 0}\n` +
+            `📁 Feuille ajoutée : "${result.sheetName || 'Export_CSV'}"\n\n` +
+            '📎 Cliquez sur le bouton ci-dessous pour télécharger le CSV.';
+
+          setStatus(message, 'success');
+
+          if (result.csvContent) {
+            addDownloadButton(result.csvContent);
+          }
+        } else {
+          setStatus('❌ ' + (result && result.error ? result.error : 'Erreur inconnue lors du traitement.'), 'error');
+        }
+      }
+
+      function handleFailure(error) {
+        setLoading(false);
+
+        let msg = 'Erreur de connexion au serveur.';
+        if (error) {
+          if (error.message)          msg = error.message;
+          else if (typeof error === 'string') msg = error;
+        }
+
+        if (msg.includes('HTTP 0') || msg.includes('NetworkError')) {
+          msg = '❌ Erreur de connexion.\n\nVérifiez votre connexion Internet et rechargez la page.';
+        }
+
+        setStatus(msg, 'error');
+        console.error('Erreur client:', error);
+      }
+
+      // ── Téléchargement ────────────────────────────────────────────
+
+      function addDownloadButton(csvContent) {
+        // Révoquer l'ancienne URL objet si elle existe (évite les fuites mémoire)
+        if (currentBlobUrl) {
+          URL.revokeObjectURL(currentBlobUrl);
+          currentBlobUrl = null;
+        }
+
+        // BOM UTF-8 pour compatibilité Excel / LibreOffice
+        const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        currentBlobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href     = currentBlobUrl;
+        link.download = 'export_' + new Date().toISOString().slice(0, 10) + '.csv';
+        link.textContent = '⬇️ Télécharger le CSV';
+        link.className   = 'download-btn';
+
+        // Révocation différée après le clic (laisser le temps au navigateur de démarrer le téléchargement)
+        link.addEventListener('click', function () {
+          setTimeout(function () {
+            if (currentBlobUrl) {
+              URL.revokeObjectURL(currentBlobUrl);
+              currentBlobUrl = null;
+            }
+          }, 2000);
+        }, { once: true });
+
+        statusEl.appendChild(document.createElement('br'));
+        statusEl.appendChild(link);
+      }
+
+      // ── Utilitaires UI ────────────────────────────────────────────
+
+      function setStatus(message, type) {
+        // Révoquer l'URL objet précédente si on efface la zone de statut
+        if (currentBlobUrl) {
+          URL.revokeObjectURL(currentBlobUrl);
+          currentBlobUrl = null;
+        }
+        statusEl.textContent = message;
+        statusEl.className   = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+      }
+
+      function setLoading(loading) {
+        convertBtn.disabled  = loading;
+        convertBtn.innerHTML = loading
+          ? '<span>⏳</span> Conversion en cours…'
+          : '<span>⚡</span> Convertir';
+      }
+
+    })();
+  </script>
+</body>
+</html>
