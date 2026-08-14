@@ -249,7 +249,9 @@
     (function () {
       'use strict';
 
-      const PICKER_API_KEY = 'AIzaSyARbDCnqpIaX9wSW22390S5ZVcaXQJV-ZQ';
+      // Clé Picker API injectée côté serveur depuis les Script Properties
+      // (voir doGet dans Code.js). Jamais codée en dur dans le dépôt.
+      const PICKER_API_KEY = '<?= pickerApiKey ?>';
 
       const statusEl  = document.getElementById('status');
       const urlInput  = document.getElementById('sheetUrl');
