@@ -10,8 +10,17 @@ const EXPORT_SHEET_NAME  = 'Export_CSV';
 // ── Points d'entrée ───────────────────────────────────────────────
 
 function doGet() {
-  return HtmlService
-    .createHtmlOutputFromFile('Index')
+  // La clé Picker API n'est PAS codée en dur dans le dépôt : elle est stockée
+  // dans les Script Properties et injectée dans le template au moment du rendu.
+  // Configuration (une seule fois) :
+  //   Éditeur Apps Script → Paramètres du projet → Propriétés du script
+  //   → ajouter PICKER_API_KEY = <clé restreinte à Google Picker API>
+  const template = HtmlService.createTemplateFromFile('Index');
+  template.pickerApiKey =
+    PropertiesService.getScriptProperties().getProperty('PICKER_API_KEY') || '';
+
+  return template
+    .evaluate()
     .setTitle('SheetToCsv')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);

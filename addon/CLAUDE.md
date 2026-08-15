@@ -9,7 +9,7 @@ Déployer le fix Picker origin et tester : `cd ~/projects/sheettocsv && clasp pu
 - Passage de `spreadsheets` (sensible) à `drive.file` (non-sensible) via Picker API — évite l'audit CASA annuel.
 - `executeAs: USER_ACCESSING` + `access: ANYONE` — requis pour le consentement Picker par utilisateur, corrige aussi le bug où tout tournait avec les credentials du développeur.
 - Picker pré-pointé sur le fichier via `setFileIds(fileId)` — préserve l'UX "coller une URL" avec un seul clic de confirmation supplémentaire.
-- Clé Picker API créée dans Cloud Console, restreinte à "Google Picker API" uniquement : `AIzaSyARbDCnqpIaX9wSW22390S5ZVcaXQJV-ZQ`.
+- Clé Picker API créée dans Cloud Console, restreinte à "Google Picker API" uniquement. La valeur n'est plus stockée dans le dépôt : elle vit dans les Script Properties (`PICKER_API_KEY`) et est injectée par `doGet()` au rendu du template.
 
 ### Ce qui vient d'être fait
 - `appsscript.json` : `executeAs USER_ACCESSING`, `access ANYONE`, scopes `drive.file` + `script.container.ui`.
@@ -28,7 +28,7 @@ Déployer le fix Picker origin et tester : `cd ~/projects/sheettocsv && clasp pu
 - `~/projects/sheettocsv/appsscript.json` — scopes et executeAs déjà corrects.
 - `~/projects/sheettocsv/Code.js` — getOAuthToken() ajouté.
 - Deployment ID prod : `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c` (@12).
-- Picker API key : `AIzaSyARbDCnqpIaX9wSW22390S5ZVcaXQJV-ZQ` (déjà dans Index.html).
+- Picker API key : stockée dans les Script Properties (`PICKER_API_KEY`), injectée par `doGet()`. Ne jamais la recoder en dur dans le dépôt. **À faire tourner (rotate) dans Cloud Console** — l'ancienne valeur a fuité dans l'historique git (commit a7d0cbd).
 - GCP project : `focused-brand-454315-s8`.
 - Token Cloudflare : `~/.config/cloudflare/splaissy.token`.
 - `/home/ubuntu/analyzor/org_routing.json` — source unique de vérité dossier→orgId pour `/rep`.
