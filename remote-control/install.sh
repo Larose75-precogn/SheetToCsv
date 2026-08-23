@@ -30,7 +30,12 @@ say "Copie des scripts vers $DEST"
 mkdir -p "$DEST"
 cp "$HERE"/rc-up.sh "$HERE"/rc-down.sh "$HERE"/rc-status.sh "$DEST"/
 chmod +x "$DEST"/rc-*.sh
-if [ -f "$DEST/sessions.json" ]; then
+if [ -f "$DEST/sessions.json" ] && grep -q CHANGEME "$DEST/sessions.json"; then
+  cp "$DEST/sessions.json" "$DEST/sessions.json.bak"
+  cp "$HERE/sessions.json" "$DEST/"
+  warn "sessions.json contenait des CHANGEME (version périmée) — remplacé."
+  warn "L'ancien est sauvegardé dans $DEST/sessions.json.bak"
+elif [ -f "$DEST/sessions.json" ]; then
   warn "sessions.json existe déjà dans $DEST — conservé (ton état de référence)."
 else
   cp "$HERE/sessions.json" "$DEST/"
@@ -92,9 +97,18 @@ systemctl --user restart claude-remote-control.service || true
 systemctl --user restart claude-remote-control.timer || true
 
 say "État"
-if ! "$DEST/rc-status.sh"; then
-  warn "Le service n'a rien démarré. Journal :"
-  journalctl --user -u claude-remote-control -n 25 --no-pager 2>&1 | sed 's/^/    /'
+"$DEST/rc-status.sh" || true
+
+want=$("$NODE_BIN" -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log((m.sessions||[]).length)' "$DEST/sessions.json" 2>/dev/null || echo 0)
+got=$("$TMUX_BIN" -L claude-rc list-windows -t rc -F '#{window_name}' 2>/dev/null | grep -vc '^_keepalive' || echo 0)
+if [ "$got" -lt "$want" ]; then
+  warn "$got session(s) sur $want. Motifs des sessions ignorées :"
+  journalctl --user -u claude-remote-control -n 60 --no-pager 2>/dev/null \
+    | grep -E 'IGNORÉ|ERREUR|plusieurs|aucun dossier' | sed 's/.*rc-up.sh\[[0-9]*\]: //' | sed 's/^/    /' \
+    || echo "    (journal indisponible)"
+  echo
+  echo "  Corrige en renseignant cwd : \$EDITOR $DEST/sessions.json"
+  echo "  Puis : systemctl --user restart claude-remote-control"
 fi
 
 cat <<EOF
