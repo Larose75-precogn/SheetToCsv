@@ -6,6 +6,10 @@ LOGDIR="${RC_LOGDIR:-$HOME/.local/state/claude-rc}"
 
 if ! tmux -L "$SOCKET" has-session -t rc 2>/dev/null; then
   echo "Remote Control : ARRÊTÉ (aucun serveur tmux)"
+  echo
+  echo "Pour savoir pourquoi :"
+  echo "  systemctl --user status claude-remote-control --no-pager -l"
+  echo "  journalctl --user -u claude-remote-control -n 30 --no-pager"
   exit 1
 fi
 

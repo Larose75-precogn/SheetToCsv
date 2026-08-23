@@ -12,6 +12,7 @@ ExecStop=%h/.claude-rc/rc-down.sh
 # rc-up.sh sort en 1 si une session du manifeste a un cwd manquant :
 # c'est un avertissement, pas une panne du service.
 SuccessExitStatus=0 1
+EnvironmentFile=-%h/.claude-rc/env
 Environment=RC_LOGDIR=%h/.local/state/claude-rc
 
 [Install]

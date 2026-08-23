@@ -37,6 +37,18 @@ else
   echo "  sessions.json copié (les chemins projets sont détectés automatiquement)."
 fi
 
+say "Capture de l'environnement pour systemd"
+# Un service systemd user démarre avec un PATH minimal : sans ça il ne
+# retrouve ni claude ni node (nvm, ~/.local/bin...).
+{
+  echo "PATH=$(dirname "$(command -v claude)"):$(dirname "$(command -v node)"):$(dirname "$(command -v tmux)"):$PATH"
+  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
+} > "$DEST/env"
+chmod 600 "$DEST/env"
+echo "  claude : $(command -v claude)"
+echo "  node   : $(command -v node)"
+echo "  tmux   : $(command -v tmux)"
+
 say "Installation des units systemd"
 mkdir -p "$UNITS"
 cp "$HERE"/claude-remote-control.service \
@@ -55,10 +67,13 @@ fi
 say "Authentification longue durée"
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
   echo "  ok  ANTHROPIC_API_KEY présente"
+elif [ -s "$HOME/.claude/.credentials.json" ]; then
+  echo "  ok  identifiants Claude présents ($HOME/.claude/.credentials.json)"
+  echo "      (si les sessions retombent en 'worker_auth_expired', lance: claude setup-token)"
 else
-  warn "Aucun token long terme détecté."
+  warn "Aucun identifiant détecté."
   warn "Lance : claude setup-token"
-  warn "Sans ça, l'auth expire et les sessions tombent en 'worker_auth_expired'."
+  warn "Sans ça, les sessions tomberont en 'worker_auth_expired'."
 fi
 
 say "Activation du service"
@@ -66,7 +81,10 @@ systemctl --user enable --now claude-remote-control.service
 systemctl --user enable --now claude-remote-control.timer
 
 say "État"
-"$DEST/rc-status.sh" || true
+if ! "$DEST/rc-status.sh"; then
+  warn "Le service n'a rien démarré. Journal :"
+  journalctl --user -u claude-remote-control -n 25 --no-pager 2>&1 | sed 's/^/    /'
+fi
 
 cat <<EOF
 

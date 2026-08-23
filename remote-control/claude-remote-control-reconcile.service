@@ -6,4 +6,5 @@ After=claude-remote-control.service
 Type=oneshot
 ExecStart=%h/.claude-rc/rc-up.sh
 SuccessExitStatus=0 1
+EnvironmentFile=-%h/.claude-rc/env
 Environment=RC_LOGDIR=%h/.local/state/claude-rc
