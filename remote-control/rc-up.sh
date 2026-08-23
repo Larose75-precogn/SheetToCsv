@@ -11,17 +11,36 @@ SEARCH_ROOTS="${RC_SEARCH_ROOTS:-$HOME}"
 SEARCH_DEPTH="${RC_SEARCH_DEPTH:-4}"
 
 log() { printf '[rc-up] %s\n' "$*"; }
-die() { printf '[rc-up] ERREUR: %s\n' "$*" >&2; exit 1; }
+die() { printf '[rc-up] ERREUR: %s\n' "$*" >&2; exit 2; }
 
-command -v tmux >/dev/null || die "tmux absent. Installe-le: apt install tmux"
-command -v claude >/dev/null || die "CLI claude absent du PATH."
-command -v node  >/dev/null || die "node absent (requis pour lire le manifeste)."
+# shellcheck source=/dev/null
+[ -f "$HOME/.claude-rc/env" ] && . "$HOME/.claude-rc/env"
+
+# Résout un binaire : variable figée à l'installation, sinon PATH,
+# sinon emplacements habituels (nvm, ~/.local/bin, /usr/local/bin...).
+resolve_bin() {
+  local pinned="$1" name="$2" p
+  if [ -n "$pinned" ] && [ -x "$pinned" ]; then printf '%s' "$pinned"; return 0; fi
+  if p="$(command -v "$name" 2>/dev/null)"; then printf '%s' "$p"; return 0; fi
+  for p in "$HOME/.local/bin/$name" "/usr/local/bin/$name" "/usr/bin/$name" "/bin/$name" \
+           "$HOME/.claude/local/$name" "$HOME/.bun/bin/$name"; do
+    [ -x "$p" ] && { printf '%s' "$p"; return 0; }
+  done
+  for p in "$HOME"/.nvm/versions/node/*/bin/"$name"; do
+    [ -x "$p" ] && { printf '%s' "$p"; return 0; }
+  done
+  return 1
+}
+
+TMUX_BIN="$(resolve_bin "${TMUX_BIN:-}" tmux)"     || die "tmux introuvable. apt install tmux"
+CLAUDE_BIN="$(resolve_bin "${CLAUDE_BIN:-}" claude)" || die "CLI claude introuvable (ni PATH, ni emplacements usuels)."
+NODE_BIN="$(resolve_bin "${NODE_BIN:-}" node)"     || die "node introuvable (requis pour lire le manifeste)."
 [ -f "$MANIFEST" ] || die "manifeste introuvable: $MANIFEST"
 
 mkdir -p "$LOGDIR"
 
 # Le manifeste est aplati en lignes TSV: slug \t name \t cwd \t model \t effort \t perm
-ROWS="$(node -e '
+ROWS="$("$NODE_BIN" -e '
   const fs = require("fs");
   const m = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
   const d = m.defaults || {};
@@ -41,9 +60,9 @@ ROWS="$(node -e '
 
 [ -n "$ROWS" ] || die "aucune session dans le manifeste."
 
-tmux -L "$SOCKET" has-session -t rc 2>/dev/null || {
+"$TMUX_BIN" -L "$SOCKET" has-session -t rc 2>/dev/null || {
   log "démarrage du serveur tmux ($SOCKET)"
-  tmux -L "$SOCKET" new-session -d -s rc -n _keepalive "sleep infinity"
+  "$TMUX_BIN" -L "$SOCKET" new-session -d -s rc -n _keepalive "sleep infinity"
 }
 
 started=0; alive=0; failed=0
@@ -51,7 +70,7 @@ started=0; alive=0; failed=0
 while IFS=$'\x1f' read -r slug name cwd model effort perm; do
   [ -n "$slug" ] || continue
 
-  if tmux -L "$SOCKET" list-panes -a -F '#{window_name}' 2>/dev/null | grep -qx "$slug"; then
+  if "$TMUX_BIN" -L "$SOCKET" list-panes -a -F '#{window_name}' 2>/dev/null | grep -qx "$slug"; then
     log "déjà vivant : $name"
     alive=$((alive + 1))
     continue
@@ -100,8 +119,8 @@ while IFS=$'\x1f' read -r slug name cwd model effort perm; do
   fi
 
   log "démarrage : $name  [$model / $effort / $perm]"
-  tmux -L "$SOCKET" new-window -d -t rc -n "$slug" -c "$cwd" \
-    "exec claude --remote-control '$name' \
+  "$TMUX_BIN" -L "$SOCKET" new-window -d -t rc -n "$slug" -c "$cwd" \
+    "exec '$CLAUDE_BIN' --remote-control '$name' \
        --model '$model' --effort '$effort' --permission-mode '$perm' \
        2>&1 | tee -a '$LOGDIR/$slug.log'"
   started=$((started + 1))

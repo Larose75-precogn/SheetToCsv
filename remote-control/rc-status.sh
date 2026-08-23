@@ -2,9 +2,11 @@
 # État courant du Remote Control.
 set -uo pipefail
 SOCKET="claude-rc"
+[ -f "$HOME/.claude-rc/env" ] && . "$HOME/.claude-rc/env"
+TMUX_BIN="${TMUX_BIN:-$(command -v tmux || echo /usr/bin/tmux)}"
 LOGDIR="${RC_LOGDIR:-$HOME/.local/state/claude-rc}"
 
-if ! tmux -L "$SOCKET" has-session -t rc 2>/dev/null; then
+if ! "$TMUX_BIN" -L "$SOCKET" has-session -t rc 2>/dev/null; then
   echo "Remote Control : ARRÊTÉ (aucun serveur tmux)"
   echo
   echo "Pour savoir pourquoi :"
@@ -16,10 +18,10 @@ fi
 echo "Remote Control : ACTIF"
 echo
 printf '%-42s %s\n' "SESSION" "DEPUIS"
-tmux -L "$SOCKET" list-windows -t rc \
+"$TMUX_BIN" -L "$SOCKET" list-windows -t rc \
   -F '#{window_name}|#{t:window_activity}' | grep -v '^_keepalive|' |
 while IFS='|' read -r w t; do printf '%-42s %s\n' "$w" "$t"; done
 
 echo
 echo "Logs : $LOGDIR"
-echo "Attacher : tmux -L $SOCKET attach -t rc"
+echo "Attacher : $TMUX_BIN -L $SOCKET attach -t rc"

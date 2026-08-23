@@ -40,14 +40,22 @@ fi
 say "Capture de l'environnement pour systemd"
 # Un service systemd user démarre avec un PATH minimal : sans ça il ne
 # retrouve ni claude ni node (nvm, ~/.local/bin...).
-{
-  echo "PATH=$(dirname "$(command -v claude)"):$(dirname "$(command -v node)"):$(dirname "$(command -v tmux)"):$PATH"
-  [ -n "${ANTHROPIC_API_KEY:-}" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
-} > "$DEST/env"
+CLAUDE_BIN="$(command -v claude)"
+NODE_BIN="$(command -v node)"
+TMUX_BIN="$(command -v tmux)"
+
+# Chemins absolus figés : le service ne dépend plus du PATH.
+printf 'CLAUDE_BIN=%s\nNODE_BIN=%s\nTMUX_BIN=%s\nPATH=%s\n' \
+  "$CLAUDE_BIN" "$NODE_BIN" "$TMUX_BIN" \
+  "$(dirname "$CLAUDE_BIN"):$(dirname "$NODE_BIN"):$(dirname "$TMUX_BIN"):/usr/local/bin:/usr/bin:/bin" \
+  > "$DEST/env"
+if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+  printf 'ANTHROPIC_API_KEY=%s\n' "$ANTHROPIC_API_KEY" >> "$DEST/env"
+fi
 chmod 600 "$DEST/env"
-echo "  claude : $(command -v claude)"
-echo "  node   : $(command -v node)"
-echo "  tmux   : $(command -v tmux)"
+echo "  claude : $CLAUDE_BIN"
+echo "  node   : $NODE_BIN"
+echo "  tmux   : $TMUX_BIN"
 
 say "Installation des units systemd"
 mkdir -p "$UNITS"
@@ -77,8 +85,11 @@ else
 fi
 
 say "Activation du service"
-systemctl --user enable --now claude-remote-control.service
-systemctl --user enable --now claude-remote-control.timer
+systemctl --user enable claude-remote-control.service
+systemctl --user enable claude-remote-control.timer
+# RemainAfterExit peut laisser l'unité "active" après un échec : on force.
+systemctl --user restart claude-remote-control.service || true
+systemctl --user restart claude-remote-control.timer || true
 
 say "État"
 if ! "$DEST/rc-status.sh"; then
