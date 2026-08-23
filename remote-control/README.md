@@ -81,12 +81,25 @@ Chaque session tourne dans une fenêtre `tmux` dédiée sur le socket `claude-rc
 démarre que ce qui manque. C'est pour ça qu'il peut tourner toutes les 5 min sans
 rien dupliquer, et qu'il fait à la fois installateur et réparateur.
 
+## Reprise de l'historique
+
+Les conversations vivent sur l'hôte, dans `~/.claude/projects/<dossier-encodé>/*.jsonl`
+(`/home/x/projet` → `-home-x-projet`). Avant de démarrer une session, `rc-up.sh` regarde
+si une conversation existe pour son répertoire de travail ; si oui, `rc-launch.sh` lance
+`claude --continue`, qui reprend la dernière conversation de ce dossier.
+
+Si la reprise échoue dans les 25 premières secondes, `rc-launch.sh` **relance
+immédiatement la même session sans historique**. Une session repart toujours : le pire
+cas est une conversation vierge, jamais une session morte. Un arrêt plus tardif est
+considéré comme une fin normale, et le timer reprend la main.
+
+Désactivable globalement ou par session avec `"continue": false`.
+
 ## Limites
 
-- Les sessions redémarrées sont **neuves** : elles reprennent le nom et la config,
-  pas l'historique de conversation. Les ID cloud (`session_01...`) et les ID locaux
-  (UUID) sont deux espaces distincts ; `--resume` attend un ID local, donc reprendre
-  une conversation cloud morte par son ID n'est pas fiable et n'est pas tenté ici.
+- Reprendre une conversation **cloud** morte par son ID n'est pas possible : les ID
+  cloud (`session_01...`) et locaux (UUID) sont deux espaces distincts, et `--resume`
+  attend un ID local. La reprise se fait par répertoire de travail, pas par ID.
 - `permission_mode` par défaut est `acceptEdits`, comme l'ancien setup.
   `bypassPermissions` n'est volontairement pas utilisé.
 - La détection de chemin s'appuie sur le nom des dossiers. Si tes projets ne portent

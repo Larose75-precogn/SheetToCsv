@@ -1,12 +1,14 @@
 {
   "_comment": "État de référence du Remote Control. rc-up.sh rejoue exactement ce fichier.",
   "_host": "Doit tourner sur un hôte toujours allumé (le VPS), PAS sur le MSI.",
+  "_continue": "true = la session reprend sa dernière conversation dans ce dossier. Si la reprise échoue, la session redémarre à vide automatiquement. Mettre false pour repartir toujours de zéro.",
   "_cwd": "Optionnel. Sans cwd, rc-up.sh cherche sous $HOME un dossier correspondant au nom de la session. Renseigne-le seulement si la détection se trompe ou hésite.",
 
   "defaults": {
     "model": "claude-opus-4-8",
     "effort": "high",
-    "permission_mode": "acceptEdits"
+    "permission_mode": "acceptEdits",
+    "continue": true
   },
 
   "sessions": [

@@ -5,6 +5,7 @@ set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFEST="${RC_MANIFEST:-$HERE/sessions.json}"
+LAUNCHER="$HERE/rc-launch.sh"
 SOCKET="claude-rc"
 LOGDIR="${RC_LOGDIR:-$HOME/.local/state/claude-rc}"
 SEARCH_ROOTS="${RC_SEARCH_ROOTS:-$HOME}"
@@ -36,6 +37,7 @@ TMUX_BIN="$(resolve_bin "${TMUX_BIN:-}" tmux)"     || die "tmux introuvable. apt
 CLAUDE_BIN="$(resolve_bin "${CLAUDE_BIN:-}" claude)" || die "CLI claude introuvable (ni PATH, ni emplacements usuels)."
 NODE_BIN="$(resolve_bin "${NODE_BIN:-}" node)"     || die "node introuvable (requis pour lire le manifeste)."
 [ -f "$MANIFEST" ] || die "manifeste introuvable: $MANIFEST"
+[ -x "$LAUNCHER" ] || die "lanceur introuvable ou non exécutable: $LAUNCHER"
 
 
 # Réduit une liste de candidats : dépôts git d'abord, sinon le moins profond.
@@ -69,6 +71,7 @@ ROWS="$("$NODE_BIN" -e '
       s.model           || d.model           || "opus",
       s.effort          || d.effort          || "high",
       s.permission_mode || d.permission_mode || "acceptEdits",
+      (s.continue !== undefined ? s.continue : (d.continue !== undefined ? d.continue : true)) ? "1" : "0",
     ].join("\x1f") + "\n");
   }
 ' "$MANIFEST")" || die "manifeste JSON invalide."
@@ -82,7 +85,7 @@ ROWS="$("$NODE_BIN" -e '
 
 started=0; alive=0; failed=0
 
-while IFS=$'\x1f' read -r slug name cwd model effort perm; do
+while IFS=$'\x1f' read -r slug name cwd model effort perm want_hist; do
   [ -n "$slug" ] || continue
 
   if "$TMUX_BIN" -L "$SOCKET" list-panes -a -F '#{window_name}' 2>/dev/null | grep -qx "$slug"; then
@@ -144,10 +147,23 @@ while IFS=$'\x1f' read -r slug name cwd model effort perm; do
     esac
   fi
 
-  log "démarrage : $name  [$model / $effort / $perm]"
+  # Claude range les conversations par dossier de travail :
+  # /home/x/projet -> ~/.claude/projects/-home-x-projet/*.jsonl
+  hist=0
+  if [ "$want_hist" = "1" ]; then
+    proj="$HOME/.claude/projects/$(printf '%s' "$cwd" | tr '/' '-')"
+    if [ -d "$proj" ] && [ -n "$(find "$proj" -maxdepth 1 -name '*.jsonl' -print -quit 2>/dev/null)" ]; then
+      hist=1
+    fi
+  fi
+  if [ "$hist" = "1" ]; then
+    log "démarrage : $name  [$model / $effort / $perm] + historique"
+  else
+    log "démarrage : $name  [$model / $effort / $perm]"
+  fi
+
   "$TMUX_BIN" -L "$SOCKET" new-window -d -t rc -n "$slug" -c "$cwd" \
-    "exec '$CLAUDE_BIN' --remote-control '$name' \
-       --model '$model' --effort '$effort' --permission-mode '$perm' \
+    "exec '$LAUNCHER' '$CLAUDE_BIN' '$name' '$model' '$effort' '$perm' '$hist' \
        2>&1 | tee -a '$LOGDIR/$slug.log'"
   started=$((started + 1))
 done <<< "$ROWS"

@@ -28,7 +28,7 @@ warn "Cet hôte doit rester allumé 24/7. Si c'est un laptop, arrête ici."
 
 say "Copie des scripts vers $DEST"
 mkdir -p "$DEST"
-cp "$HERE"/rc-up.sh "$HERE"/rc-down.sh "$HERE"/rc-status.sh "$DEST"/
+cp "$HERE"/rc-up.sh "$HERE"/rc-down.sh "$HERE"/rc-status.sh "$HERE"/rc-launch.sh "$DEST"/
 chmod +x "$DEST"/rc-*.sh
 if [ -f "$DEST/sessions.json" ] && grep -q CHANGEME "$DEST/sessions.json"; then
   cp "$DEST/sessions.json" "$DEST/sessions.json.bak"
