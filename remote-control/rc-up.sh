@@ -37,6 +37,21 @@ CLAUDE_BIN="$(resolve_bin "${CLAUDE_BIN:-}" claude)" || die "CLI claude introuva
 NODE_BIN="$(resolve_bin "${NODE_BIN:-}" node)"     || die "node introuvable (requis pour lire le manifeste)."
 [ -f "$MANIFEST" ] || die "manifeste introuvable: $MANIFEST"
 
+
+# Réduit une liste de candidats : dépôts git d'abord, sinon le moins profond.
+# N'écrit dans $PICK que si le résultat est unique.
+narrow() {
+  local -n _in=$1; local -a git_ones=() shallow=(); local d min=9999 n
+  PICK=""
+  for d in "${_in[@]}"; do [ -d "$d/.git" ] && git_ones+=("$d"); done
+  if [ "${#git_ones[@]}" -eq 1 ]; then PICK="${git_ones[0]}"; return 0; fi
+  if [ "${#git_ones[@]}" -gt 1 ]; then _in=("${git_ones[@]}"); fi
+  for d in "${_in[@]}"; do n=$(printf '%s' "$d" | tr -cd / | wc -c); [ "$n" -lt "$min" ] && min="$n"; done
+  for d in "${_in[@]}"; do n=$(printf '%s' "$d" | tr -cd / | wc -c); [ "$n" -eq "$min" ] && shallow+=("$d"); done
+  [ "${#shallow[@]}" -eq 1 ] && { PICK="${shallow[0]}"; return 0; }
+  return 1
+}
+
 mkdir -p "$LOGDIR"
 
 # Le manifeste est aplati en lignes TSV: slug \t name \t cwd \t model \t effort \t perm
@@ -91,7 +106,7 @@ while IFS=$'\x1f' read -r slug name cwd model effort perm; do
          log "chemin retrouvé pour '$name' : $cwd" ;;
       0) # Repli : essayer chaque mot du nom de session (>= 3 lettres).
          # "Structory investor deck narrative restructure" -> le dossier "deck".
-         declare -A seen=(); words=()
+         declare -A seen=(); words=(); found_by_narrow=0
          for w in $(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' ' '); do
            [ "${#w}" -ge 3 ] || continue
            for h in $(find $SEARCH_ROOTS -maxdepth "$SEARCH_DEPTH" -type d \
@@ -107,14 +122,25 @@ while IFS=$'\x1f' read -r slug name cwd model effort perm; do
            if [ "${#words[@]}" -eq 0 ]; then
              log "IGNORÉ : $name — aucun dossier correspondant sous: $SEARCH_ROOTS"
            else
-             log "IGNORÉ : $name — plusieurs dossiers possibles, précise le cwd :"
-             printf '           %s\n' "${words[@]}"
+             if narrow words; then
+               cwd="$PICK"
+               log "chemin retrouvé pour '$name' (mot-clé, départage) : $cwd"
+               found_by_narrow=1
+             else
+               log "IGNORÉ : $name — plusieurs dossiers possibles, précise le cwd :"
+               printf '           %s\n' "${words[@]}"
+             fi
            fi
+           [ "${found_by_narrow:-0}" = "1" ] || { failed=$((failed + 1)); continue; }
+         fi ;;
+      *) if narrow hits; then
+           cwd="$PICK"
+           log "chemin retrouvé pour '$name' (départage) : $cwd"
+         else
+           log "IGNORÉ : $name — plusieurs dossiers '$token' possibles, précise le cwd :"
+           printf '           %s\n' "${hits[@]}"
            failed=$((failed + 1)); continue
          fi ;;
-      *) log "IGNORÉ : $name — plusieurs dossiers '$token' possibles, précise le cwd :"
-         printf '           %s\n' "${hits[@]}"
-         failed=$((failed + 1)); continue ;;
     esac
   fi
 

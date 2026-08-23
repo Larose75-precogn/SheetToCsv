@@ -103,8 +103,9 @@ want=$("$NODE_BIN" -e 'const m=JSON.parse(require("fs").readFileSync(process.arg
 got=$("$TMUX_BIN" -L claude-rc list-windows -t rc -F '#{window_name}' 2>/dev/null | grep -vc '^_keepalive' || echo 0)
 if [ "$got" -lt "$want" ]; then
   warn "$got session(s) sur $want. Motifs des sessions ignorées :"
-  journalctl --user -u claude-remote-control -n 60 --no-pager 2>/dev/null \
-    | grep -E 'IGNORÉ|ERREUR|plusieurs|aucun dossier' | sed 's/.*rc-up.sh\[[0-9]*\]: //' | sed 's/^/    /' \
+  journalctl --user -u claude-remote-control --no-pager --since '-3 min' 2>/dev/null \
+    | sed 's/.*rc-up\.sh\[[0-9]*\]: //' \
+    | grep -E 'IGNORÉ|ERREUR|^ +/' | sed 's/^/    /' \
     || echo "    (journal indisponible)"
   echo
   echo "  Corrige en renseignant cwd : \$EDITOR $DEST/sessions.json"
