@@ -34,19 +34,7 @@ if [ -f "$DEST/sessions.json" ]; then
   warn "sessions.json existe déjà dans $DEST — conservé (ton état de référence)."
 else
   cp "$HERE/sessions.json" "$DEST/"
-  warn "sessions.json copié. ÉDITE-LE : remplace chaque CHANGEME par le vrai chemin."
-fi
-
-if grep -q CHANGEME "$DEST/sessions.json" 2>/dev/null; then
-  say "Chemins à renseigner"
-  warn "sessions.json contient encore des CHANGEME : aucune session ne démarrera."
-  echo "  Répertoires candidats trouvés sur cet hôte :"
-  { find "$HOME" -maxdepth 3 -type d -name .git -not -path "*/node_modules/*" 2>/dev/null \
-      | sed 's:/\.git$::' | sort -u | head -30
-  } | sed 's/^/    /'
-  echo
-  echo "  Édite : \$EDITOR $DEST/sessions.json"
-  echo "  Puis  : systemctl --user start claude-remote-control"
+  echo "  sessions.json copié (les chemins projets sont détectés automatiquement)."
 fi
 
 say "Installation des units systemd"

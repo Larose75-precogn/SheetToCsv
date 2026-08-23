@@ -1,6 +1,7 @@
 {
   "_comment": "État de référence du Remote Control. rc-up.sh rejoue exactement ce fichier.",
   "_host": "Doit tourner sur un hôte toujours allumé (le VPS), PAS sur le MSI.",
+  "_cwd": "Optionnel. Sans cwd, rc-up.sh cherche sous $HOME un dossier correspondant au nom de la session. Renseigne-le seulement si la détection se trompe ou hésite.",
 
   "defaults": {
     "model": "claude-opus-4-8",
@@ -9,34 +10,12 @@
   },
 
   "sessions": [
-    {
-      "name": "Structory.ai/compta",
-      "cwd": "CHANGEME/structory/compta"
-    },
-    {
-      "name": "Structory.ai/Comptacopro",
-      "cwd": "CHANGEME/structory/comptacopro"
-    },
-    {
-      "name": "Structory.ai/JdB",
-      "cwd": "CHANGEME/structory/jdb"
-    },
-    {
-      "name": "Structory.ai/SMC",
-      "cwd": "CHANGEME/structory/smc"
-    },
-    {
-      "name": "Structory investor deck narrative restructure",
-      "cwd": "CHANGEME/structory/deck",
-      "model": "claude-fable-5"
-    },
-    {
-      "name": "Game",
-      "cwd": "CHANGEME/game"
-    },
-    {
-      "name": "Multi-user",
-      "cwd": "CHANGEME/multi-user"
-    }
+    { "name": "Structory.ai/compta" },
+    { "name": "Structory.ai/Comptacopro" },
+    { "name": "Structory.ai/JdB" },
+    { "name": "Structory.ai/SMC" },
+    { "name": "Structory investor deck narrative restructure", "model": "claude-fable-5" },
+    { "name": "Game" },
+    { "name": "Multi-user" }
   ]
 }

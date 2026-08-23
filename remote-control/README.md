@@ -23,11 +23,11 @@ Ce dossier corrige les deux causes :
 
 ## Installation (sur le VPS)
 
+Une seule commande :
+
 ```bash
-git clone https://github.com/Larose75-precogn/SheetToCsv.git
-cd SheetToCsv/remote-control
-$EDITOR sessions.json        # remplace chaque CHANGEME par le vrai chemin
-./install.sh
+git clone -q -b claude/remote-control-disconnected-up31x3 --depth 1 \
+  https://github.com/Larose75-precogn/SheetToCsv.git /tmp/rc && /tmp/rc/remote-control/install.sh
 ```
 
 `install.sh` refuse de tourner en root, vérifie les prérequis, copie tout dans
@@ -50,8 +50,8 @@ tmux -L claude-rc attach -t rc                 # voir les sessions en direct
 {
   "defaults": { "model": "claude-opus-4-8", "effort": "high", "permission_mode": "acceptEdits" },
   "sessions": [
-    { "name": "Structory.ai/compta", "cwd": "/home/user/structory/compta" },
-    { "name": "Game", "cwd": "/home/user/game", "model": "claude-fable-5" }
+    { "name": "Structory.ai/compta" },
+    { "name": "Game", "cwd": "/home/user/jeux/game", "model": "claude-fable-5" }
   ]
 }
 ```
@@ -59,10 +59,18 @@ tmux -L claude-rc attach -t rc                 # voir les sessions en direct
 `name` devient le nom affiché de la session (`claude --remote-control "<name>"`).
 Chaque session peut surcharger `model`, `effort`, `permission_mode`.
 
-Les 7 sessions pré-remplies reprennent les noms, modèles et niveaux d'effort relevés
-sur les sessions mortes. **Les `cwd` sont des `CHANGEME`** : cette information n'était
-pas récupérable depuis les métadonnées cloud. Une session dont le `cwd` n'existe pas
-est signalée bruyamment et ignorée — jamais démarrée au mauvais endroit en silence.
+**`cwd` est optionnel.** Le répertoire de travail n'était pas récupérable depuis les
+métadonnées cloud, donc `rc-up.sh` le retrouve seul : il cherche sous `$HOME` un dossier
+portant le nom de la session (`Structory.ai/compta` → `compta`), en ignorant
+`node_modules`, `.git` et `.cache`. Sans correspondance, il réessaie mot par mot
+(`Structory investor deck narrative restructure` → `deck`).
+
+- une seule correspondance → utilisée, et le chemin retenu est affiché
+- plusieurs → session ignorée, candidats listés, à toi de trancher via `cwd`
+- aucune → session ignorée avec le motif
+
+Jamais de démarrage au mauvais endroit en silence. Renseigne `cwd` seulement si la
+détection hésite ou se trompe. Racine de recherche ajustable via `RC_SEARCH_ROOTS`.
 
 ## Fonctionnement
 
@@ -81,3 +89,5 @@ rien dupliquer, et qu'il fait à la fois installateur et réparateur.
   une conversation cloud morte par son ID n'est pas fiable et n'est pas tenté ici.
 - `permission_mode` par défaut est `acceptEdits`, comme l'ancien setup.
   `bypassPermissions` n'est volontairement pas utilisé.
+- La détection de chemin s'appuie sur le nom des dossiers. Si tes projets ne portent
+  pas un nom proche de celui des sessions, renseigne `cwd` explicitement.
