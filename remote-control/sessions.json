@@ -1,0 +1,42 @@
+{
+  "_comment": "État de référence du Remote Control. rc-up.sh rejoue exactement ce fichier.",
+  "_host": "Doit tourner sur un hôte toujours allumé (le VPS), PAS sur le MSI.",
+
+  "defaults": {
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "permission_mode": "acceptEdits"
+  },
+
+  "sessions": [
+    {
+      "name": "Structory.ai/compta",
+      "cwd": "CHANGEME/structory/compta"
+    },
+    {
+      "name": "Structory.ai/Comptacopro",
+      "cwd": "CHANGEME/structory/comptacopro"
+    },
+    {
+      "name": "Structory.ai/JdB",
+      "cwd": "CHANGEME/structory/jdb"
+    },
+    {
+      "name": "Structory.ai/SMC",
+      "cwd": "CHANGEME/structory/smc"
+    },
+    {
+      "name": "Structory investor deck narrative restructure",
+      "cwd": "CHANGEME/structory/deck",
+      "model": "claude-fable-5"
+    },
+    {
+      "name": "Game",
+      "cwd": "CHANGEME/game"
+    },
+    {
+      "name": "Multi-user",
+      "cwd": "CHANGEME/multi-user"
+    }
+  ]
+}

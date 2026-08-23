@@ -1,0 +1,11 @@
+[Unit]
+Description=Vérifie le Remote Control toutes les 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=claude-remote-control-reconcile.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

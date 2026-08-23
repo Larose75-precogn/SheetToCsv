@@ -1,0 +1,9 @@
+[Unit]
+Description=Réconcilie le Remote Control avec sessions.json (relance ce qui est mort)
+After=claude-remote-control.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.claude-rc/rc-up.sh
+SuccessExitStatus=0 1
+Environment=RC_LOGDIR=%h/.local/state/claude-rc
