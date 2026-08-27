@@ -57,6 +57,14 @@
             margin-top: 30px;
             margin-bottom: 15px;
         }
+        .trademark-note {
+            max-width: 900px;
+            margin: 0 auto 40px;
+            padding: 0 40px 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #7f8c8d;
+        }
         .last-updated {
             color: #7f8c8d;
             font-style: italic;
@@ -97,7 +105,7 @@
         <p class="last-updated">Dernière mise à jour : <span id="date"></span></p>
 
         <h2>1. Introduction</h2>
-        <p>SheetToCsv Premium ("nous", "notre", "nos") respecte votre vie privée. Cette politique décrit comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre add-on Google Sheets de Structory.</p>
+        <p>SheetToCsv Premium ("nous", "notre", "nos") respecte votre vie privée. Cette politique décrit comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre add-on Google Sheets™ de Structory.</p>
 
         <h2>2. Données collectées</h2>
         <p>Nous collectons les données suivantes :</p>
@@ -111,31 +119,39 @@
         <p>Vos données sont utilisées pour :</p>
         <ul>
             <li>Activer et gérer votre licence premium</li>
-            <li>Convertir vos feuilles Google Sheets en CSV</li>
+            <li>Convertir vos feuilles Google Sheets™ en CSV</li>
             <li>Vous envoyer des informations sur votre compte (confirmation de paiement, expiration de licence)</li>
             <li>Améliorer notre service</li>
         </ul>
 
         <h2>4. Stockage des données</h2>
         <ul>
-            <li><strong>Licences :</strong> Les informations de licence (email, statut, dates) sont stockées dans un Google Sheet sécurisé.</li>
-            <li><strong>Données de conversion :</strong> Les données CSV sont créées temporairement dans votre Google Sheet et ne sont pas stockées ailleurs.</li>
+            <li><strong>Licences :</strong> Les informations de licence (email, statut, dates) sont stockées dans une feuille Google Sheets™ sécurisée.</li>
+            <li><strong>Données de conversion :</strong> Les données CSV sont créées temporairement dans votre classeur Google Sheets™ et ne sont pas stockées ailleurs.</li>
         </ul>
 
         <h2>5. Partage des données</h2>
         <p>Nous ne vendons, n'échangeons ni ne transférons vos informations personnelles à des tiers.</p>
         <ul>
             <li><strong>Stripe :</strong> Pour traiter les paiements (consultez leur <a href="https://stripe.com/privacy" target="_blank">politique de confidentialité</a>)</li>
-            <li><strong>Google :</strong> Pour l'intégration avec Google Sheets (consultez leur <a href="https://policies.google.com/privacy" target="_blank">politique de confidentialité</a>)</li>
+            <li><strong>Google :</strong> Pour l'intégration avec Google Sheets™ (consultez leur <a href="https://policies.google.com/privacy" target="_blank">politique de confidentialité</a>)</li>
         </ul>
 
-        <h2>6. Sécurité</h2>
+        <h2>6. Autorisations OAuth demandées</h2>
+        <p>SheetToCsv demande le minimum d'autorisations nécessaires à son fonctionnement :</p>
+        <ul>
+            <li><strong>https://www.googleapis.com/auth/drive.file</strong> — accès <em>par fichier</em>. L'application ne peut lire et modifier que le classeur que vous ouvrez explicitement avec elle (classeur actif du module complémentaire, ou fichier que vous sélectionnez dans la fenêtre Google Picker™). Elle n'a aucun accès au reste de votre Google Drive™.</li>
+            <li><strong>https://www.googleapis.com/auth/script.container.ui</strong> — affichage de l'interface du module complémentaire (menu, panneau latéral, boîtes de dialogue) dans Google Sheets™.</li>
+        </ul>
+        <p>Le contenu de vos feuilles est lu en mémoire pendant la conversion, puis écrit dans une feuille <strong>Export_CSV</strong> de votre propre classeur. Aucune donnée de feuille de calcul n'est transmise ni stockée sur nos serveurs.</p>
+
+        <h2>7. Sécurité</h2>
         <p>Nous mettons en œuvre des mesures de sécurité pour protéger vos informations. L'accès aux données est limité aux seules personnes autorisées.</p>
 
-        <h2>7. Conservation des données</h2>
+        <h2>8. Conservation des données</h2>
         <p>Vos informations de licence sont conservées tant que vous avez un compte actif. Vous pouvez demander la suppression de vos données à tout moment.</p>
 
-        <h2>8. Vos droits</h2>
+        <h2>9. Vos droits</h2>
         <p>Conformément au RGPD, vous avez le droit de :</p>
         <ul>
             <li>Accéder à vos données personnelles</li>
@@ -144,13 +160,18 @@
             <li>Vous opposer au traitement de vos données, en précisant l'outil utilisé et vos références</li>
         </ul>
 
-        <h2>9. Contact</h2>
+        <h2>10. Contact</h2>
         <p>Pour toute question concernant cette politique, contactez-nous à :</p>
         <p><strong>Email :</strong> <a href="mailto:larose75@9l9.org">larose75@9l9.org</a></p>
 
-        <h2>10. Modifications de cette politique</h2>
+        <h2>11. Modifications de cette politique</h2>
         <p>Cette politique peut être mise à jour occasionnellement. La date de la dernière mise à jour sera toujours indiquée en haut de cette page.</p>
     </div>
+
+    <p class="trademark-note">
+        Google Sheets™, Google Drive™ et Google Workspace™ sont des marques de Google LLC.
+        SheetToCsv est une application indépendante, non affiliée à Google LLC, ni approuvée ou sponsorisée par Google LLC.
+    </p>
 
     <script>
         document.getElementById('date').textContent = new Date().toLocaleDateString('fr-FR', {

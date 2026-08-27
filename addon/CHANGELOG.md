@@ -1,5 +1,33 @@
 # Changelog — SheetToCsv
 
+## [1.1.0] — 2026-08-27
+
+Version préparée pour la resoumission à la Google Workspace Marketplace, en réponse aux points
+soulevés par l'équipe de revue.
+
+### Corrigé
+- **Erreur d'autorisation dans le panneau latéral** (erreur constatée par la revue Google) : la
+  carte tentait d'accéder au classeur actif avant que l'autorisation par fichier du scope
+  `drive.file` ait été accordée. La carte propose désormais un bouton « Autoriser ce classeur »
+  (`requestFileScopeForActiveDocument`), et le manifeste déclare `onFileScopeGrantedTrigger`.
+- `convertCurrentSheet` ne rouvre plus le classeur actif via `SpreadsheetApp.openById()` — appel
+  non couvert par `drive.file`. Le classeur actif est utilisé directement.
+
+### Ajouté
+- Bouton « Convertir ce classeur » fonctionnel dans le panneau latéral (auparavant la carte se
+  contentait d'un texte renvoyant vers le menu).
+- Icônes officielles 128/96/48/32 px, carrées, à fond transparent (`assets/icons/`), générées par
+  `tools/make_icons.py`. Même icône dans le manifeste, la carte et la web app.
+- Attribution des marques Google (™ + note de bas de page) dans l'application, la web app, la
+  politique de confidentialité, les conditions d'utilisation et le README.
+- Section « Autorisations OAuth demandées » dans la politique de confidentialité.
+- `docs/MARKETPLACE_LISTING.md` (textes de la fiche + checklist) et
+  `docs/reponse-google-review.md` (brouillon de réponse à la revue).
+
+### Modifié
+- `logoUrl` du manifeste : `structory.ai` → `addon.9l9.org/assets/icons/sheettocsv-128.png`.
+- Web app : icône réelle à la place de l'emoji, badge « v2.0 » retiré, liens légaux en pied de page.
+
 ## [1.0.0] — 2026-07-28
 
 Version de référence. Publiée après validation Google OAuth et audit complet du code.

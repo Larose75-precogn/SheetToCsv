@@ -14,9 +14,10 @@
   "addOns": {
     "common": {
       "name": "SheetToCsv",
-      "logoUrl": "https://structory.ai/logo-sheettocsv.png",
+      "logoUrl": "https://addon.9l9.org/assets/icons/sheettocsv-128.png",
       "layoutProperties": {
-        "primaryColor": "#f59e0b"
+        "primaryColor": "#f59e0b",
+        "secondaryColor": "#f59e0b"
       },
       "homepageTrigger": {
         "runFunction": "onHomepage"
@@ -25,6 +26,9 @@
     "sheets": {
       "homepageTrigger": {
         "runFunction": "onHomepage"
+      },
+      "onFileScopeGrantedTrigger": {
+        "runFunction": "onFileScopeGranted"
       }
     }
   }

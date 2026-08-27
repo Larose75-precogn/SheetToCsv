@@ -7,6 +7,10 @@ const MAX_SHEETS       = 30;
 const MAX_ROWS_PER_SHEET = 10000;
 const EXPORT_SHEET_NAME  = 'Export_CSV';
 
+// Icône officielle : identique à la fiche Marketplace, à l'écran de consentement
+// OAuth et à l'interface de l'application.
+const ADDON_ICON_URL = 'https://addon.9l9.org/assets/icons/sheettocsv-128.png';
+
 // ── Points d'entrée ───────────────────────────────────────────────
 
 function doGet() {
@@ -43,12 +47,12 @@ function getOAuthToken() {
   return ScriptApp.getOAuthToken();
 }
 
-// ── Add-on : menu et carte ────────────────────────────────────────
+// ── Add-on : menu et cartes ──────────────────────────────────────
 
 function onOpen(e) {
   SpreadsheetApp.getUi()
     .createMenu('SheetToCsv')
-    .addItem('🔄 Convertir ce classeur', 'convertCurrentSheet')
+    .addItem('Convertir ce classeur en CSV', 'convertCurrentSheet')
     .addToUi();
 }
 
@@ -58,37 +62,174 @@ function onInstall(e) {
   onOpen(e);
 }
 
+// ── Carte du panneau latéral (Google Workspace Add-on) ───────────
+//
+// Avec le scope drive.file, le module complémentaire n'a accès au classeur
+// ouvert qu'après une autorisation par fichier accordée par l'utilisateur.
+// Tant que cette autorisation n'est pas donnée, toute lecture du classeur
+// échoue : la carte doit donc proposer le bouton d'autorisation, et non
+// tenter la conversion directement.
+
 function onHomepage(e) {
-  return CardService.newCardBuilder()
-    .setHeader(
-      CardService.newCardHeader()
-        .setTitle('SheetToCsv')
-        .setSubtitle('Convertit toutes les feuilles en un seul CSV')
-    )
-    .addSection(
-      CardService.newCardSection()
-        .addWidget(
-          CardService.newTextParagraph()
-            .setText('Ouvrez un classeur Google Sheets et utilisez le menu SheetToCsv pour convertir toutes les feuilles en un seul fichier CSV.')
-        )
-    )
+  const hasFileAccess = !!(e && e.sheets && e.sheets.addonHasFileScopePermission);
+  return hasFileAccess ? buildReadyCard() : buildAuthorizationCard();
+}
+
+// Déclenché par Google une fois que l'utilisateur a autorisé le fichier courant.
+function onFileScopeGranted(e) {
+  return CardService.newNavigation().updateCard(buildReadyCard());
+}
+
+// Demande l'accès au seul classeur actuellement ouvert (scope drive.file).
+function requestFileScope(e) {
+  return CardService.newEditorFileScopeActionResponseBuilder()
+    .requestFileScopeForActiveDocument()
     .build();
 }
 
+function buildCardHeader() {
+  return CardService.newCardHeader()
+    .setTitle('SheetToCsv')
+    .setSubtitle('Toutes les feuilles en un seul fichier CSV')
+    .setImageUrl(ADDON_ICON_URL);
+}
+
+function buildAuthorizationCard() {
+  return CardService.newCardBuilder()
+    .setHeader(buildCardHeader())
+    .addSection(
+      CardService.newCardSection()
+        .addWidget(
+          CardService.newTextParagraph().setText(
+            'SheetToCsv rassemble toutes les feuilles de ce classeur dans un ' +
+            'seul fichier CSV, avec une colonne indiquant la feuille d\'origine.'
+          )
+        )
+        .addWidget(
+          CardService.newTextParagraph().setText(
+            '<b>Accès requis :</b> autorisez SheetToCsv à accéder à <b>ce classeur ' +
+            'uniquement</b>. Aucun autre fichier de votre Google Drive\u2122 n\'est lu.'
+          )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('Autoriser ce classeur')
+            .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+            .setOnClickAction(CardService.newAction().setFunctionName('requestFileScope'))
+        )
+    )
+    .addSection(buildTrademarkSection())
+    .build();
+}
+
+function buildReadyCard(message) {
+  const section = CardService.newCardSection();
+
+  if (message) {
+    section.addWidget(CardService.newTextParagraph().setText(message));
+  } else {
+    section.addWidget(
+      CardService.newTextParagraph().setText(
+        'Cliquez sur Convertir : une feuille <b>Export_CSV</b> est ajoutée à ce ' +
+        'classeur avec toutes les données consolidées, prête à être téléchargée ' +
+        'en CSV depuis Fichier &gt; Télécharger.'
+      )
+    );
+  }
+
+  section.addWidget(
+    CardService.newTextButton()
+      .setText('Convertir ce classeur')
+      .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+      .setOnClickAction(CardService.newAction().setFunctionName('convertFromCard'))
+  );
+
+  return CardService.newCardBuilder()
+    .setHeader(buildCardHeader())
+    .addSection(section)
+    .addSection(buildTrademarkSection())
+    .build();
+}
+
+// Attribution des marques Google exigée par les règles de la Marketplace.
+function buildTrademarkSection() {
+  return CardService.newCardSection().addWidget(
+    CardService.newTextParagraph().setText(
+      '<font color="#94a3b8"><i>Google Sheets\u2122, Google Drive\u2122 et Google ' +
+      'Workspace\u2122 sont des marques de Google LLC. SheetToCsv est une ' +
+      'application indépendante, non affiliée à Google LLC.</i></font>'
+    )
+  );
+}
+
+// Conversion depuis la carte du panneau latéral.
+function convertFromCard(e) {
+  const result = convertActiveSpreadsheet();
+
+  if (!result.success) {
+    return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification().setText(result.error))
+      .setNavigation(CardService.newNavigation().updateCard(
+        buildReadyCard('<b>Échec de la conversion.</b><br>' + result.error)
+      ))
+      .build();
+  }
+
+  const summary =
+    '<b>Conversion réussie.</b><br>' +
+    'Feuilles traitées : ' + result.sheetCount + '<br>' +
+    'Lignes exportées : ' + result.rowCount + '<br>' +
+    'Feuille ajoutée : « ' + result.sheetName + ' »<br><br>' +
+    'Téléchargez le CSV via Fichier &gt; Télécharger &gt; Valeurs séparées par des virgules.';
+
+  return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification().setText('Conversion réussie.'))
+    .setNavigation(CardService.newNavigation().updateCard(buildReadyCard(summary)))
+    .build();
+}
+
+// Conversion depuis le menu de la feuille de calcul.
 function convertCurrentSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const url = 'https://docs.google.com/spreadsheets/d/' + spreadsheet.getId();
-  const result = processSheet(url);
+  const result = convertActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
+
   if (result.success) {
     ui.alert(
-      '✅ Conversion réussie !',
-      `📊 ${result.sheetCount} feuilles exportées\n📝 ${result.rowCount} lignes traitées\n📁 Feuille créée : "${result.sheetName}"`,
+      'Conversion réussie',
+      result.sheetCount + ' feuille(s) exportée(s)\n' +
+      result.rowCount + ' ligne(s) traitée(s)\n' +
+      'Feuille créée : "' + result.sheetName + '"',
       ui.ButtonSet.OK
     );
   } else {
-    ui.alert('❌ Erreur', result.error || 'Erreur inconnue', ui.ButtonSet.OK);
+    ui.alert('Erreur', result.error || 'Erreur inconnue', ui.ButtonSet.OK);
   }
+}
+
+// Point d'entrée commun aux deux interfaces du module complémentaire.
+//
+// Le classeur actif est utilisé directement : le scope drive.file autorise
+// SheetToCsv sur le fichier ouvert, mais PAS sur une réouverture par
+// identifiant via SpreadsheetApp.openById(), qui échouait avec une erreur
+// d'autorisation.
+function convertActiveSpreadsheet() {
+  let spreadsheet;
+  try {
+    spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  } catch (e) {
+    return buildFileScopeError();
+  }
+  if (!spreadsheet) return buildFileScopeError();
+
+  return processSpreadsheet(spreadsheet);
+}
+
+function buildFileScopeError() {
+  return {
+    success: false,
+    error: 'SheetToCsv n\'a pas encore accès à ce classeur. Ouvrez le panneau ' +
+           'SheetToCsv puis cliquez sur « Autoriser ce classeur ».'
+  };
 }
 
 // ── Traitement principal ──────────────────────────────────────────
@@ -109,6 +250,17 @@ function processSheet(url) {
       return buildPermissionError(e);
     }
 
+    return processSpreadsheet(spreadsheet);
+
+  } catch (error) {
+    console.error('Erreur processSheet:', error.message);
+    return { success: false, error: error.message || 'Une erreur inconnue est survenue.' };
+  }
+}
+
+// Conversion d'un classeur déjà ouvert (add-on) ou résolu depuis une URL (web app).
+function processSpreadsheet(spreadsheet) {
+  try {
     const { rows, sheetCount } = readAllSheets(spreadsheet);
     if (!rows.length) throw new Error('Aucune donnée trouvée dans les feuilles.');
 
@@ -124,7 +276,7 @@ function processSheet(url) {
     };
 
   } catch (error) {
-    console.error('Erreur processSheet:', error.message);
+    console.error('Erreur processSpreadsheet:', error.message);
     return { success: false, error: error.message || 'Une erreur inconnue est survenue.' };
   }
 }

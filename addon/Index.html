@@ -183,7 +183,19 @@
       color: #94a3b8;
     }
 
-    .footer span { margin: 0 6px; }
+    .footer span,
+    .footer a { margin: 0 6px; color: #94a3b8; text-decoration: none; }
+
+    .footer a:hover { color: #64748b; text-decoration: underline; }
+
+    .footer .trademark {
+      margin-top: 10px;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: #b0b8c4;
+    }
+
+    .app-icon { display: block; border-radius: 10px; }
 
     @media (max-width: 768px) {
       .container { padding: 24px 16px 20px; border-radius: 20px; }
@@ -204,20 +216,20 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>📄 SheetToCsv</h1>
-      <span class="badge">v2.0</span>
+      <img class="app-icon" src="data:image/png;base64,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" alt="Icône SheetToCsv" width="40" height="40">
+      <h1>SheetToCsv</h1>
     </div>
 
     <div class="subtitle">
-      Convertissez toutes les feuilles d'un Google Sheet en un seul fichier CSV
+      Convertissez toutes les feuilles d'un classeur Google Sheets™ en un seul fichier CSV
     </div>
 
     <div class="subtitle privacy-note">
-      🔒 Vos données restent privées : à l'étape suivante, Google vous demandera de confirmer l'accès à <strong>ce fichier précis uniquement</strong> — l'application ne voit aucun autre document de votre Drive.
+      🔒 Vos données restent privées : à l'étape suivante, Google vous demandera de confirmer l'accès à <strong>ce fichier précis uniquement</strong> — l'application ne voit aucun autre document de votre Google Drive™.
     </div>
 
     <div class="form-group">
-      <label for="sheetUrl">🔗 URL du Google Sheet</label>
+      <label for="sheetUrl">URL du classeur Google Sheets™</label>
       <input
         type="url"
         id="sheetUrl"
@@ -233,15 +245,19 @@
     </button>
 
     <div id="status" class="info">
-      💡 Entrez l'URL d'un Google Sheet et cliquez sur Convertir.
+      Entrez l'URL d'un classeur Google Sheets™ et cliquez sur Convertir.
     </div>
 
     <div class="footer">
-      <span>Standalone WebApp</span>
+      <span>SheetToCsv par Structory</span>
       <span>·</span>
-      <span>structory</span>
+      <a href="https://addon.9l9.org/privacy.html" target="_blank" rel="noopener">Confidentialité</a>
       <span>·</span>
-      <span>Add‑on compatible</span>
+      <a href="https://addon.9l9.org/terms.html" target="_blank" rel="noopener">Conditions</a>
+      <p class="trademark">
+        Google Sheets™, Google Drive™ et Google Workspace™ sont des marques de Google LLC.
+        SheetToCsv est une application indépendante, non affiliée à Google LLC ni approuvée par Google LLC.
+      </p>
     </div>
   </div>
 
