@@ -245,12 +245,22 @@ function processSheet(url) {
 
     let spreadsheet;
     try {
-      spreadsheet = SpreadsheetApp.openById(sheetId);
+      // Pas de SpreadsheetApp.openById() ici : cet appel exige le scope large
+      // .../auth/spreadsheets, celui que la revue Marketplace nous a demande de
+      // retirer. L'API Sheets accepte drive.file, donc uniquement le fichier que
+      // l'utilisateur a designe dans le Picker.
+      spreadsheet = openSpreadsheetByIdRest_(sheetId);
     } catch (e) {
       return buildPermissionError(e);
     }
 
-    return processSpreadsheet(spreadsheet);
+    const result = processSpreadsheet(spreadsheet);
+    try {
+      spreadsheet.flushPending();
+    } catch (e) {
+      console.error('Erreur mise en forme de la feuille export :', e.message);
+    }
+    return result;
 
   } catch (error) {
     console.error('Erreur processSheet:', error.message);
@@ -444,4 +454,289 @@ function buildPermissionError(error) {
     };
   }
   return { success: false, error: 'Erreur d\'ouverture : ' + msg };
+}
+
+
+// ================================================================
+// Acces au classeur via l'API Sheets (autorisation par fichier)
+// ================================================================
+//
+// Pourquoi ce module existe :
+// la web app rouvre un classeur que l'utilisateur vient de designer dans le
+// Google Picker(TM). SpreadsheetApp.openById() exige pour cela le scope
+// https://www.googleapis.com/auth/spreadsheets - l'acces a *tous* les classeurs
+// de l'utilisateur, precisement ce que la revue Google Workspace Marketplace
+// nous a demande de retirer. L'API Sheets, elle, accepte drive.file : elle
+// n'ouvre que les fichiers explicitement accordes via le Picker.
+//
+// Ce module reimplemente la petite partie de l'interface SpreadsheetApp
+// reellement utilisee par readAllSheets() et writeExportSheet(), afin que ces
+// deux fonctions restent communes au panneau lateral et a la web app.
+
+const SHEETS_API_BASE   = 'https://sheets.googleapis.com/v4/spreadsheets';
+const VALUES_CHUNK_ROWS = 5000; // decoupage des ecritures volumineuses
+
+function sheetsApiFetch_(method, path, payload) {
+  const options = {
+    method: method,
+    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+    muteHttpExceptions: true
+  };
+  if (payload) {
+    options.contentType = 'application/json';
+    options.payload     = JSON.stringify(payload);
+  }
+
+  const response = UrlFetchApp.fetch(SHEETS_API_BASE + path, options);
+  const code     = response.getResponseCode();
+  const body     = response.getContentText();
+
+  if (code < 200 || code >= 300) {
+    throw new Error('Sheets API ' + code + ' : ' + body);
+  }
+  return body ? JSON.parse(body) : {};
+}
+
+// Titre de feuille en notation A1 : les apostrophes internes se doublent.
+function quoteSheetTitle_(title) {
+  return "'" + String(title).replace(/'/g, "''") + "'";
+}
+
+function columnToLetter_(column) {
+  let letter = '';
+  let n = column;
+  while (n > 0) {
+    const rest = (n - 1) % 26;
+    letter = String.fromCharCode(65 + rest) + letter;
+    n = Math.floor((n - 1) / 26);
+  }
+  return letter;
+}
+
+function hexToRgbColor_(hex) {
+  const clean = String(hex).replace('#', '');
+  return {
+    red:   parseInt(clean.substring(0, 2), 16) / 255,
+    green: parseInt(clean.substring(2, 4), 16) / 255,
+    blue:  parseInt(clean.substring(4, 6), 16) / 255
+  };
+}
+
+// L'API renvoie des lignes de longueurs inegales (cellules vides de fin
+// tronquees) alors que getDisplayValues() renvoie un rectangle plein.
+// On retablit le rectangle pour que readAllSheets() se comporte a l'identique.
+function padRowsToRectangle_(values) {
+  let width = 0;
+  for (const row of values) {
+    if (row.length > width) width = row.length;
+  }
+  return values.map(function (row) {
+    const padded = row.map(function (cell) {
+      return (cell === null || cell === undefined) ? '' : String(cell);
+    });
+    while (padded.length < width) padded.push('');
+    return padded;
+  });
+}
+
+function openSpreadsheetByIdRest_(spreadsheetId) {
+  const encodedId = encodeURIComponent(spreadsheetId);
+
+  const meta = sheetsApiFetch_(
+    'get', '/' + encodedId + '?fields=sheets.properties(sheetId,title,index)');
+
+  const props   = (meta.sheets || []).map(function (s) { return s.properties; });
+  const pending = [];   // requetes batchUpdate en attente (mise en forme)
+  let valuesCache = null;
+
+  function gridRange(sheetId, row, col, numRows, numCols) {
+    return {
+      sheetId:          sheetId,
+      startRowIndex:    row - 1,
+      endRowIndex:      row - 1 + numRows,
+      startColumnIndex: col - 1,
+      endColumnIndex:   col - 1 + numCols
+    };
+  }
+
+  // Toutes les feuilles sont lues en une seule requete.
+  function prefetchValues() {
+    if (valuesCache) return;
+    valuesCache = {};
+    if (!props.length) return;
+
+    const ranges = props.map(function (p) {
+      return 'ranges=' + encodeURIComponent(quoteSheetTitle_(p.title));
+    }).join('&');
+
+    const res = sheetsApiFetch_('get',
+      '/' + encodedId + '/values:batchGet' +
+      '?valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS&' + ranges);
+
+    (res.valueRanges || []).forEach(function (valueRange, i) {
+      if (props[i]) {
+        valuesCache[props[i].title] = padRowsToRectangle_(valueRange.values || []);
+      }
+    });
+  }
+
+  function writeValues(title, row, col, values) {
+    if (!values.length) return;
+
+    for (let offset = 0; offset < values.length; offset += VALUES_CHUNK_ROWS) {
+      const chunk    = values.slice(offset, offset + VALUES_CHUNK_ROWS);
+      const startRow = row + offset;
+      const endRow   = startRow + chunk.length - 1;
+      const endCol   = col + (chunk[0] ? chunk[0].length : 1) - 1;
+
+      const a1 = quoteSheetTitle_(title) + '!' +
+                 columnToLetter_(col) + startRow + ':' +
+                 columnToLetter_(endCol) + endRow;
+
+      // RAW : les valeurs viennent deja de getDisplayValues(), il ne faut pas
+      // que Sheets les reinterprete (formules, dates, separateurs decimaux).
+      sheetsApiFetch_('put',
+        '/' + encodedId + '/values/' + encodeURIComponent(a1) + '?valueInputOption=RAW',
+        { values: chunk });
+    }
+  }
+
+  function makeRange(p, row, col, numRows, numCols) {
+    const format = {};
+    const fields = [];
+    let slot = -1;
+
+    function applyFormat(field) {
+      if (fields.indexOf(field) === -1) fields.push(field);
+      if (slot === -1) {
+        slot = pending.length;
+        pending.push(null);
+      }
+      pending[slot] = {
+        repeatCell: {
+          range:  gridRange(p.sheetId, row, col, numRows, numCols),
+          cell:   { userEnteredFormat: format },
+          fields: fields.join(',')
+        }
+      };
+    }
+
+    const range = {
+      setValues: function (values) {
+        writeValues(p.title, row, col, values);
+        return range;
+      },
+      setFontWeight: function (weight) {
+        format.textFormat = format.textFormat || {};
+        format.textFormat.bold = (weight === 'bold');
+        applyFormat('userEnteredFormat.textFormat.bold');
+        return range;
+      },
+      setFontColor: function (color) {
+        format.textFormat = format.textFormat || {};
+        format.textFormat.foregroundColor = hexToRgbColor_(color);
+        applyFormat('userEnteredFormat.textFormat.foregroundColor');
+        return range;
+      },
+      setBackground: function (color) {
+        format.backgroundColor = hexToRgbColor_(color);
+        applyFormat('userEnteredFormat.backgroundColor');
+        return range;
+      },
+      setHorizontalAlignment: function (alignment) {
+        format.horizontalAlignment = String(alignment).toUpperCase();
+        applyFormat('userEnteredFormat.horizontalAlignment');
+        return range;
+      },
+      merge: function () {
+        pending.push({
+          mergeCells: {
+            range:     gridRange(p.sheetId, row, col, numRows, numCols),
+            mergeType: 'MERGE_ALL'
+          }
+        });
+        return range;
+      }
+    };
+    return range;
+  }
+
+  function makeSheet(p) {
+    const sheet = {
+      _props:  p,
+      getName: function () { return p.title; },
+      getDataRange: function () {
+        prefetchValues();
+        const values = valuesCache[p.title] || [];
+        return { getDisplayValues: function () { return values; } };
+      },
+      getRange: function (row, col, numRows, numCols) {
+        return makeRange(p, row, col, numRows, numCols);
+      },
+      autoResizeColumn: function (col) {
+        pending.push({
+          autoResizeDimensions: {
+            dimensions: {
+              sheetId:    p.sheetId,
+              dimension:  'COLUMNS',
+              startIndex: col - 1,
+              endIndex:   col
+            }
+          }
+        });
+        return sheet;
+      },
+      setFrozenRows: function (count) {
+        pending.push({
+          updateSheetProperties: {
+            properties: { sheetId: p.sheetId, gridProperties: { frozenRowCount: count } },
+            fields:     'gridProperties.frozenRowCount'
+          }
+        });
+        return sheet;
+      }
+    };
+    return sheet;
+  }
+
+  const spreadsheet = {
+    getSheets: function () {
+      return props.map(makeSheet);
+    },
+
+    getSheetByName: function (name) {
+      const found = props.filter(function (p) { return p.title === name; })[0];
+      return found ? makeSheet(found) : null;
+    },
+
+    deleteSheet: function (sheet) {
+      spreadsheet.flushPending();
+      sheetsApiFetch_('post', '/' + encodedId + ':batchUpdate',
+        { requests: [{ deleteSheet: { sheetId: sheet._props.sheetId } }] });
+
+      const i = props.indexOf(sheet._props);
+      if (i >= 0) props.splice(i, 1);
+      if (valuesCache) delete valuesCache[sheet._props.title];
+    },
+
+    insertSheet: function (name) {
+      spreadsheet.flushPending();
+      const res = sheetsApiFetch_('post', '/' + encodedId + ':batchUpdate',
+        { requests: [{ addSheet: { properties: { title: name } } }] });
+
+      const created = res.replies[0].addSheet.properties;
+      props.push(created);
+      return makeSheet(created);
+    },
+
+    // Envoie en une seule requete toute la mise en forme accumulee.
+    flushPending: function () {
+      if (!pending.length) return;
+      const requests = pending.splice(0, pending.length).filter(function (r) { return r; });
+      if (!requests.length) return;
+      sheetsApiFetch_('post', '/' + encodedId + ':batchUpdate', { requests: requests });
+    }
+  };
+
+  return spreadsheet;
 }
