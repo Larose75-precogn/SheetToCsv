@@ -251,7 +251,7 @@ function processSheet(url) {
       // l'utilisateur a designe dans le Picker.
       spreadsheet = openSpreadsheetByIdRest_(sheetId);
     } catch (e) {
-      return buildPermissionError(e);
+      return buildSheetsApiError_(e);
     }
 
     const result = processSpreadsheet(spreadsheet);
@@ -439,6 +439,20 @@ function getFrenchDateTime() {
   const dayIdx = new Date(parseInt(annee), parseInt(mm) - 1, parseInt(dd)).getDay();
 
   return `${jours[dayIdx]} ${dd} ${mois[parseInt(mm) - 1]} ${annee} à ${HH}h${min}m${sec}s`;
+}
+
+// Echec d'ouverture cote API Sheets. Le message clair est conserve pour
+// l'utilisateur, mais la reponse brute de Google est jointe : sans elle,
+// impossible de distinguer "API Sheets desactivee sur le projet Cloud" de
+// "fichier non accorde par le Picker" - les deux remontent en 403/404.
+function buildSheetsApiError_(error) {
+  const raw      = (error && error.message) || '';
+  const friendly = buildPermissionError(error);
+  if (!raw) return friendly;
+  return {
+    success: false,
+    error: friendly.error + '\n\nDetail technique :\n' + raw.slice(0, 800)
+  };
 }
 
 function buildPermissionError(error) {
