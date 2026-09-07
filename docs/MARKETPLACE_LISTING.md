@@ -179,12 +179,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-État au 7 septembre 2026. Le code est déployé en **version 26** sur le déploiement
+État au 7 septembre 2026. Le code est déployé en **version 27** sur le déploiement
 `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ### Fait
 
-- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 26.
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 27.
       L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
 - [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
       `logoUrl` du manifeste pointait auparavant vers une URL en 404.

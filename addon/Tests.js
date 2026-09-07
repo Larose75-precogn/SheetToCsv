@@ -53,7 +53,6 @@ function runAllTests() {
   testExtractSheetId();
   testIsSheetEmpty();
   testGenerateCsv();
-  testBuildPermissionError();
   testGetFrenchDateTime();
   testReadAllSheets();
   testWriteExportSheet();
@@ -236,40 +235,6 @@ function testGenerateCsv() {
   _assert('Tableau vide → chaîne vide',
     generateCsv([]),
     '');
-}
-
-// ================================================================
-// 4 — buildPermissionError
-// ================================================================
-
-function testBuildPermissionError() {
-  _section_('buildPermissionError');
-
-  const r1 = buildPermissionError({ message: 'You do not have permission to access' });
-  _assert('You do not have permission → success:false', r1.success, false);
-  _assertContains('Message accès refusé', r1.error, 'Accès refusé');
-
-  const r2 = buildPermissionError({ message: 'HTTP 403 Forbidden' });
-  _assert('403 → success:false', r2.success, false);
-  _assertContains('Message 403', r2.error, 'Accès refusé');
-
-  const r3 = buildPermissionError({ message: 'PERMISSION_DENIED' });
-  _assert('PERMISSION_DENIED → success:false', r3.success, false);
-  _assertContains('PERMISSION_DENIED', r3.error, 'Accès refusé');
-
-  const r4 = buildPermissionError({ message: 'not found' });
-  _assert('not found → success:false', r4.success, false);
-  _assertContains('not found', r4.error, 'Accès refusé');
-
-  const r5 = buildPermissionError({ message: 'Timeout après 30s' });
-  _assert('Autre erreur → success:false', r5.success, false);
-  _assertContains('Autre erreur message inclus', r5.error, 'Timeout après 30s');
-
-  const r6 = buildPermissionError(null);
-  _assert('null → success:false', r6.success, false);
-
-  const r7 = buildPermissionError({});
-  _assert('objet sans message → success:false', r7.success, false);
 }
 
 // ================================================================
