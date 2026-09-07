@@ -4,7 +4,7 @@ Objet : `Re: SheetToCsv (406510929267) - Google Workspace Marketplace Review`
 
 > À envoyer **après** avoir mis à jour la fiche (voir la checklist de
 > `docs/MARKETPLACE_LISTING.md`, section 6).
-> Le script est déployé : **version 24**, déploiement
+> Le script est déployé : **version 25**, déploiement
 > `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ---

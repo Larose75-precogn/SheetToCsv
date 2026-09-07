@@ -76,8 +76,12 @@ function onHomepage(e) {
 }
 
 // Déclenché par Google une fois que l'utilisateur a autorisé le fichier courant.
+// Ce trigger doit renvoyer un Card, pas un Navigation : c'est un déclencheur
+// contextuel, pas la réponse à un clic. Renvoyer un Navigation laissait la
+// carte bloquée sur l'écran d'autorisation apres que l'utilisateur ait
+// pourtant accorde l'acces — le symptome meme signale par la revue Google.
 function onFileScopeGranted(e) {
-  return CardService.newNavigation().updateCard(buildReadyCard());
+  return buildReadyCard();
 }
 
 // Demande l'accès au seul classeur actuellement ouvert (scope drive.file).

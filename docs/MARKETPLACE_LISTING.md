@@ -185,12 +185,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-État au 7 septembre 2026. Le code est déployé en **version 24** sur le déploiement
+État au 7 septembre 2026. Le code est déployé en **version 25** sur le déploiement
 `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ### Fait
 
-- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 24.
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 25.
       L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
 - [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
       `logoUrl` du manifeste pointait auparavant vers une URL en 404.
@@ -207,7 +207,7 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 - [ ] Téléverser les quatre icônes, et la même icône sur l'écran de consentement OAuth.
 - [ ] Vérifier les captures d'écran de la fiche : elles doivent montrer l'interface réelle
       (panneau latéral avec le bouton « Autoriser ce classeur » puis « Convertir ce classeur »).
-- [ ] Renseigner le **numéro de version 24** dans la configuration de la fiche.
+- [ ] Renseigner le **numéro de version 25** dans la configuration de la fiche.
 - [ ] Enregistrer la vidéo de démonstration et remplacer `[LIEN VIDÉO À METTRE À JOUR]` dans
       `docs/reponse-google-review.md`.
 - [ ] Envoyer la réponse à `gwm-review@google.com` (brouillon dans
