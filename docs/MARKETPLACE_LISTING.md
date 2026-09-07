@@ -72,9 +72,6 @@ Autorisations demandées
   Google Drive™.
 • Affichage de l'interface (script.container.ui) : nécessaire pour afficher le panneau
   latéral et le menu de l'application dans Google Sheets™.
-• Appels sortants (script.external_request) : nécessaire à l'application web, qui lit et
-  écrit le classeur choisi via l'API Google Sheets™. Les appels sortants sont limités à
-  cette seule adresse.
 
 Le contenu de vos feuilles est traité pendant la conversion puis écrit dans votre propre
 classeur. Aucune donnée de feuille de calcul n'est transmise à un serveur tiers ni conservée
@@ -117,9 +114,6 @@ Permissions requested
   explicitly open it with. It has no access to the rest of your Google Drive™.
 • User interface (script.container.ui): required to display the side panel and the menu
   inside Google Sheets™.
-• Outbound requests (script.external_request): required by the companion web app, which
-  reads and writes the selected spreadsheet through the Google Sheets™ API. Outbound calls
-  are restricted to that single address.
 
 Your spreadsheet content is processed during the conversion and written back into your own
 spreadsheet. No spreadsheet data is sent to a third-party server or retained by the developer.

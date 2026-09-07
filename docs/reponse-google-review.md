@@ -46,14 +46,13 @@ produced the authorization error you saw. This has been fixed:
 - the code no longer re-opens the active spreadsheet by ID (`SpreadsheetApp.openById`), which
   is not covered by the `drive.file` scope; it uses the active spreadsheet directly.
 
-**5. Keeping the narrow scope in the companion web app.** The project also exposes a standalone
-web app. It let the user pick a spreadsheet through Google Picker™ and then re-opened it with
+**5. Keeping the narrow scope everywhere.** The project also exposes a standalone web app,
+which let the user pick a spreadsheet through Google Picker™ and then re-opened it with
 `SpreadsheetApp.openById()` — an Apps Script call that requires the broad
-`https://www.googleapis.com/auth/spreadsheets` scope. Rather than requesting that scope, the
-web app now reads and writes the selected spreadsheet through the Sheets API, which accepts
-`drive.file` and therefore reaches only the single file the user designated in the Picker. The
-Picker now also passes `setAppId` with the Cloud project number, so that the per-file grant is
-correctly recorded against this project.
+`https://www.googleapis.com/auth/spreadsheets` scope. Rather than requesting that scope, that
+conversion path has been withdrawn: the web app now directs the user to the add-on side panel,
+which works on the active spreadsheet and needs no additional permission. The add-on itself is
+unaffected.
 
 **6. Consistency between the listing, the legal pages and the app.** The privacy policy and the
 terms of service described a paid subscription handled by Stripe, an email address collected
@@ -62,16 +61,15 @@ is free, has no account, no payment path, and requests no email scope. Both page
 rewritten to describe the application as it actually behaves. They are live at
 `https://addon.9l9.org/privacy.html` and `https://addon.9l9.org/terms.html`.
 
-**Scopes requested.** The add-on requests three non-sensitive scopes:
+**Scopes requested.** The add-on requests two non-sensitive scopes:
 
 | Scope | Why |
 |---|---|
 | `https://www.googleapis.com/auth/drive.file` | per-file access to the single spreadsheet the user opens the add-on with, or designates in the Picker |
 | `https://www.googleapis.com/auth/script.container.ui` | the add-on menu, side panel and dialogs inside Google Sheets™ |
-| `https://www.googleapis.com/auth/script.external_request` | required to call the Sheets API from the web app, per point 5 above |
 
-No sensitive or restricted scope is requested. Outbound requests are constrained by an explicit
-`urlFetchWhitelist` limited to `https://sheets.googleapis.com/v4/spreadsheets/`. No spreadsheet
+No sensitive or restricted scope is requested, and the add-on makes no outbound HTTP request
+at all. No spreadsheet
 data leaves the user's own Google account: the conversion result is written to an `Export_CSV`
 tab inside the user's own spreadsheet, and nothing is stored on our side.
 
