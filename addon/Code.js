@@ -449,9 +449,11 @@ function buildSheetsApiError_(error) {
   const raw      = (error && error.message) || '';
   const friendly = buildPermissionError(error);
   if (!raw) return friendly;
+  // La reponse brute de Google est conservee, tronquee : c'est elle qui permet
+  // de distinguer un fichier non autorise d'une API desactivee.
   return {
     success: false,
-    error: friendly.error + '\n\nDetail technique :\n' + raw.slice(0, 800)
+    error: friendly.error + '\n\nDetail technique :\n' + raw.slice(0, 300)
   };
 }
 
