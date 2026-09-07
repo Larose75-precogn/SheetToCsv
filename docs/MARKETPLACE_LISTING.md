@@ -179,19 +179,38 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-À faire dans Google Cloud Console / Marketplace SDK — ces éléments ne peuvent pas être
-corrigés depuis le code :
+État au 7 septembre 2026. Le code est déployé en **version 24** sur le déploiement
+`AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
+
+### Fait
+
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 24.
+      L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
+- [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
+      `logoUrl` du manifeste pointait auparavant vers une URL en 404.
+- [x] **Cohérence « Premium ».** `privacy.html` et `terms.html` ne décrivent plus d'abonnement
+      payant, de paiement Stripe ni de collecte d'adresse email — l'application n'en comporte
+      aucun. Les deux pages sont publiées.
+- [x] **Autorisation par fichier de bout en bout.** Panneau latéral et web app fonctionnent
+      sans jamais demander le scope large `.../auth/spreadsheets`.
+
+### À faire dans la console
 
 - [ ] Corriger le nom de l'application si la fiche indique « SheetToCsc ».
-- [ ] Coller la description courte et la description détaillée ci-dessus.
+- [ ] Coller la description courte et la description détaillée (section 2 de ce document).
 - [ ] Téléverser les quatre icônes, et la même icône sur l'écran de consentement OAuth.
 - [ ] Vérifier les captures d'écran de la fiche : elles doivent montrer l'interface réelle
       (panneau latéral avec le bouton « Autoriser ce classeur » puis « Convertir ce classeur »).
-- [ ] Déployer la nouvelle version du script (`clasp push` + nouveau déploiement), puis mettre
-      à jour le numéro de version du déploiement dans la configuration de la fiche.
-- [ ] **Cohérence « Premium ».** Les pages `privacy.html` et `terms.html` décrivent une licence
-      payante, une collecte d'adresse email et des paiements Stripe. Le code publié ne contient
-      aujourd'hui **aucune** de ces fonctions et ne demande aucun scope email. Soit la fiche et
-      les pages légales décrivent une offre payante réellement disponible, soit ces passages
-      doivent être retirés : une divergence entre les documents légaux et le comportement réel
-      de l'application est un motif de refus (règle « descriptions non trompeuses »).
+- [ ] Renseigner le **numéro de version 24** dans la configuration de la fiche.
+- [ ] Enregistrer la vidéo de démonstration et remplacer `[LIEN VIDÉO À METTRE À JOUR]` dans
+      `docs/reponse-google-review.md`.
+- [ ] Envoyer la réponse à `gwm-review@google.com` (brouillon dans
+      `docs/reponse-google-review.md`), **après** les points ci-dessus.
+
+### Sécurité, indépendant de la revue
+
+- [ ] **Faire tourner la clé Picker.** L'ancienne valeur a été committée puis retirée du code,
+      mais reste lisible dans l'historique Git. Créer une nouvelle clé API restreinte à
+      Google Picker API, la placer dans les propriétés du script sous `PICKER_API_KEY`,
+      vérifier le fonctionnement, **puis supprimer l'ancienne clé** dans Cloud Console.
+      Tant que l'ancienne n'est pas supprimée, la fuite reste exploitable.

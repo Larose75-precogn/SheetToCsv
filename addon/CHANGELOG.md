@@ -1,5 +1,37 @@
 # Changelog — SheetToCsv
 
+## [1.2.0] — 2026-09-07
+
+Déployée en version 24. Rend la web app compatible avec l'autorisation par fichier, sans
+réintroduire le scope large que la revue Google avait demandé de retirer.
+
+### Corrigé
+- **Web app : « Les autorisations spécifiées ne sont pas suffisantes ».** `processSheet()`
+  rouvrait le classeur choisi via `SpreadsheetApp.openById()`, appel qui exige le scope
+  `.../auth/spreadsheets` — l'accès à tous les classeurs de l'utilisateur. La lecture et
+  l'écriture passent désormais par l'API Sheets, qui accepte `drive.file` et ne touche donc
+  que le fichier désigné dans le Picker.
+- **Web app : « Accès refusé au classeur » (404 NOT_FOUND).** Le Picker n'appelait pas
+  `setAppId()`. Sans le numéro de projet Cloud, Drive n'associait l'autorisation par fichier
+  à aucune application et refusait ensuite le classeur pourtant sélectionné.
+- **Pages légales incohérentes.** `privacy.html` et `terms.html` décrivaient un abonnement
+  payant, des paiements Stripe et une collecte d'adresse email, absents du code publié.
+  Réécrites pour décrire l'application réelle : gratuite, sans compte, sans donnée collectée.
+- **Icônes en 404.** Les fichiers `assets/icons/` n'avaient jamais été publiés ; le `logoUrl`
+  du manifeste pointait dans le vide.
+
+### Ajouté
+- Adaptateur `openSpreadsheetByIdRest_()` : réimplémente via l'API Sheets la partie de
+  l'interface `SpreadsheetApp` utilisée par `readAllSheets()` et `writeExportSheet()`, qui
+  restent donc communes au panneau latéral et à la web app.
+- La réponse brute de Google est jointe aux erreurs d'ouverture, tronquée. Sans elle, un 404
+  générique ne permet pas de distinguer un fichier non autorisé d'une API désactivée.
+
+### Modifié
+- Manifeste : ajout du scope `script.external_request`, nécessaire à l'appel de l'API Sheets,
+  et d'une `urlFetchWhitelist` limitée à `https://sheets.googleapis.com/v4/spreadsheets/`
+  (Google l'exige pour tout add-on utilisant `UrlFetchApp`).
+
 ## [1.1.0] — 2026-08-27
 
 Version préparée pour la resoumission à la Google Workspace Marketplace, en réponse aux points

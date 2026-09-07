@@ -2,14 +2,16 @@
 
 Objet : `Re: SheetToCsv (406510929267) - Google Workspace Marketplace Review`
 
-> À envoyer **après** avoir déployé la nouvelle version du script et mis à jour la fiche
-> (voir la checklist de `docs/MARKETPLACE_LISTING.md`, section 6).
+> À envoyer **après** avoir mis à jour la fiche (voir la checklist de
+> `docs/MARKETPLACE_LISTING.md`, section 6).
+> Le script est déployé : **version 24**, déploiement
+> `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ---
 
 Hello,
 
-Thank you for the detailed feedback. All four points have been addressed.
+Thank you for the detailed feedback. All points have been addressed.
 
 **1. Trademark attribution.** Every mention of a Google product now carries the ™ symbol
 (Google Sheets™, Google Drive™, Google Workspace™) in the store listing, in the app interface,
@@ -20,12 +22,14 @@ is an independent application, not affiliated with, endorsed or sponsored by Goo
 **2. Descriptions.** The short description now states in one sentence what the app does:
 "Export every tab of a Google Sheets™ spreadsheet into a single CSV file." The detailed
 description has been rewritten to describe only the app and its functionality — how it works
-step by step, the feature list, and the two OAuth scopes it requests and why. It contains no
+step by step, the feature list, and the OAuth scopes it requests and why. It contains no
 testimonials and no promotional claims.
 
 **3. Icons.** A new icon has been produced as square PNGs with transparent backgrounds in
 128×128, 96×96, 48×48 and 32×32. The same icon is now used in the store listing, on the OAuth
-consent screen, and inside the app itself (side panel card header and web app header).
+consent screen, and inside the app itself (side panel card header and web app header). These
+files are now served publicly at `https://addon.9l9.org/assets/icons/` — previously the
+manifest `logoUrl` pointed at a URL that returned 404.
 
 **4. The error you encountered.** Thank you for the screenshot — we were able to reproduce it.
 The app requests only the per-file `drive.file` scope, which grants access to a spreadsheet
@@ -42,10 +46,34 @@ produced the authorization error you saw. This has been fixed:
 - the code no longer re-opens the active spreadsheet by ID (`SpreadsheetApp.openById`), which
   is not covered by the `drive.file` scope; it uses the active spreadsheet directly.
 
-The app requests only two non-sensitive scopes:
-`https://www.googleapis.com/auth/drive.file` and
-`https://www.googleapis.com/auth/script.container.ui`. No sensitive or restricted scope is
-used, and no spreadsheet data leaves the user's own Google account.
+**5. Keeping the narrow scope in the companion web app.** The project also exposes a standalone
+web app. It let the user pick a spreadsheet through Google Picker™ and then re-opened it with
+`SpreadsheetApp.openById()` — an Apps Script call that requires the broad
+`https://www.googleapis.com/auth/spreadsheets` scope. Rather than requesting that scope, the
+web app now reads and writes the selected spreadsheet through the Sheets API, which accepts
+`drive.file` and therefore reaches only the single file the user designated in the Picker. The
+Picker now also passes `setAppId` with the Cloud project number, so that the per-file grant is
+correctly recorded against this project.
+
+**6. Consistency between the listing, the legal pages and the app.** The privacy policy and the
+terms of service described a paid subscription handled by Stripe, an email address collected
+for licence management, and a licence store. The published add-on implements none of this: it
+is free, has no account, no payment path, and requests no email scope. Both pages have been
+rewritten to describe the application as it actually behaves. They are live at
+`https://addon.9l9.org/privacy.html` and `https://addon.9l9.org/terms.html`.
+
+**Scopes requested.** The add-on requests three non-sensitive scopes:
+
+| Scope | Why |
+|---|---|
+| `https://www.googleapis.com/auth/drive.file` | per-file access to the single spreadsheet the user opens the add-on with, or designates in the Picker |
+| `https://www.googleapis.com/auth/script.container.ui` | the add-on menu, side panel and dialogs inside Google Sheets™ |
+| `https://www.googleapis.com/auth/script.external_request` | required to call the Sheets API from the web app, per point 5 above |
+
+No sensitive or restricted scope is requested. Outbound requests are constrained by an explicit
+`urlFetchWhitelist` limited to `https://sheets.googleapis.com/v4/spreadsheets/`. No spreadsheet
+data leaves the user's own Google account: the conversion result is written to an `Export_CSV`
+tab inside the user's own spreadsheet, and nothing is stored on our side.
 
 An updated end-to-end screen recording showing the new flow — install, per-file authorization,
 conversion, CSV download — is available here: [LIEN VIDÉO À METTRE À JOUR]
