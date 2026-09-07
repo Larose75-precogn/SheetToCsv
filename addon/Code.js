@@ -247,6 +247,18 @@ function processSheet(url) {
     const sheetId = extractSheetId(url);
     if (!sheetId) throw new Error('Impossible d\'extraire l\'identifiant du classeur.');
 
+    // La conversion par URL est desactivee : elle passe par l'API Sheets, donc
+    // par UrlFetchApp, donc par le scope script.external_request. Ce scope n'est
+    // pas valide sur l'ecran de consentement du projet, et sa presence empeche
+    // la publication de la fiche Marketplace. Le module complementaire, lui,
+    // travaille sur le classeur actif et n'en a pas besoin.
+    return {
+      success: false,
+      error: 'La conversion par URL est momentanement indisponible.\n\n' +
+             'Ouvrez votre classeur dans Google Sheets\u2122, puis SheetToCsv ' +
+             'dans le panneau lateral : la conversion y fonctionne normalement.'
+    };
+
     let spreadsheet;
     try {
       // Pas de SpreadsheetApp.openById() ici : cet appel exige le scope large

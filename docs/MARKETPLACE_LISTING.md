@@ -185,12 +185,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-État au 7 septembre 2026. Le code est déployé en **version 25** sur le déploiement
+État au 7 septembre 2026. Le code est déployé en **version 26** sur le déploiement
 `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ### Fait
 
-- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 25.
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 26.
       L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
 - [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
       `logoUrl` du manifeste pointait auparavant vers une URL en 404.
@@ -207,7 +207,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 - [ ] Téléverser les quatre icônes, et la même icône sur l'écran de consentement OAuth.
 - [ ] Vérifier les captures d'écran de la fiche : elles doivent montrer l'interface réelle
       (panneau latéral avec le bouton « Autoriser ce classeur » puis « Convertir ce classeur »).
-- [ ] Renseigner le **numéro de version 25** dans la configuration de la fiche.
+- [x] **Numéro de version de la fiche : 26.** Il indiquait 15, c'est-à-dire la version de juillet :
+      tous les correctifs suivants étaient invisibles pour la revue.
+- [x] **Autorisations OAuth de la fiche corrigées.** Le SDK Marketplace déclarait
+      `.../auth/spreadsheets`, l'accès à tous les classeurs de l'utilisateur — la cause du refus.
+      Remplacé par `.../auth/drive.file`. `userinfo.email` et `userinfo.profile` restent : Google
+      les impose par défaut et ils ne peuvent pas être retirés.
 - [ ] Enregistrer la vidéo de démonstration et remplacer `[LIEN VIDÉO À METTRE À JOUR]` dans
       `docs/reponse-google-review.md`.
 - [ ] Envoyer la réponse à `gwm-review@google.com` (brouillon dans
