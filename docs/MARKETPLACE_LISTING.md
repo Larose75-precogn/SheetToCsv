@@ -179,12 +179,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-État au 7 septembre 2026. Le code est déployé en **version 29** sur le déploiement
+État au 7 septembre 2026. Le code est déployé en **version 30** sur le déploiement
 `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ### Fait
 
-- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 29.
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 30.
       L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
 - [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
       `logoUrl` du manifeste pointait auparavant vers une URL en 404.
@@ -196,7 +196,7 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ### A reprendre en priorite (7 septembre au soir)
 
-- [ ] **Renseigner la version 29** dans la fiche SDK : elle indique encore 27, deux deploiements
+- [ ] **Renseigner la version 30** dans la fiche SDK : elle indique encore 27, deux deploiements
       en retard. Les correctifs du panneau lateral sont donc invisibles pour la revue.
 - [ ] **Verifier la conversion depuis le panneau lateral.** Le correctif de fond vient d ete
       deploye et n a pas encore ete teste en vrai.

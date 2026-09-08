@@ -229,10 +229,18 @@ function convertActiveSpreadsheet(e) {
   //
   // 1. Panneau lateral (module Workspace) : le script n'est lie a aucun
   //    document, SpreadsheetApp.getActiveSpreadsheet() ne renvoie rien. Google
-  //    transmet l'identifiant du document ouvert dans l'objet d'evenement, et
-  //    c'est par la qu'il faut passer. L'autorisation par fichier accordee via
-  //    requestFileScopeForActiveDocument() couvre l'ouverture de ce seul
-  //    fichier : aucun scope large n'est necessaire.
+  //    transmet l'identifiant du document ouvert dans l'objet d'evenement.
+  //
+  //    SpreadsheetApp.openById() exige le scope .../auth/spreadsheets, et cela
+  //    quel que soit l'accord par fichier obtenu via
+  //    requestFileScopeForActiveDocument() : le controle de scope d'Apps Script
+  //    est statique, il ne regarde pas les autorisations accordees fichier par
+  //    fichier. Verifie dans les journaux d'execution :
+  //      "Les autorisations specifiees ne sont pas suffisantes pour appeler
+  //       SpreadsheetApp.openById. Autorisations requises : .../spreadsheets"
+  //    Le scope est donc declare. L'ecran d'autorisation par fichier est
+  //    conserve : il previent l'utilisateur avant tout acces, et c'est lui qui
+  //    manquait lors de la revue Google.
   //
   // 2. Menu SheetToCsv de la feuille : la, le script s'execute bien dans le
   //    contexte du classeur, et getActiveSpreadsheet() est la bonne methode.
@@ -245,7 +253,7 @@ function convertActiveSpreadsheet(e) {
     try {
       spreadsheet = SpreadsheetApp.openById(sheetsEvent.id);
     } catch (err) {
-      console.error('Ouverture par identifiant refusee :', err.message);
+      console.error('Ouverture du classeur refusee :', err.message);
       return buildFileScopeError();
     }
   } else {

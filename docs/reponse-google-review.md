@@ -46,13 +46,21 @@ produced the authorization error you saw. This has been fixed:
 - the code no longer re-opens the active spreadsheet by ID (`SpreadsheetApp.openById`), which
   is not covered by the `drive.file` scope; it uses the active spreadsheet directly.
 
-**5. Keeping the narrow scope everywhere.** The project also exposes a standalone web app,
-which let the user pick a spreadsheet through Google Picker™ and then re-opened it with
-`SpreadsheetApp.openById()` — an Apps Script call that requires the broad
-`https://www.googleapis.com/auth/spreadsheets` scope. Rather than requesting that scope, that
-conversion path has been withdrawn: the web app now directs the user to the add-on side panel,
-which works on the active spreadsheet and needs no additional permission. The add-on itself is
-unaffected.
+**5. Why the app requests the `spreadsheets` scope.** The add-on runs as a Google Workspace
+add-on, so it is not bound to any document: `SpreadsheetApp.getActiveSpreadsheet()` returns
+nothing in that context, and the spreadsheet has to be opened from the id supplied in the event
+object. `SpreadsheetApp.openById()` requires `https://www.googleapis.com/auth/spreadsheets`, and
+Apps Script enforces that statically — the per-file grant obtained through
+`requestFileScopeForActiveDocument()` does not lift the requirement. The execution log is
+explicit:
+
+> Les autorisations spécifiées ne sont pas suffisantes pour appeler SpreadsheetApp.openById.
+> Autorisations requises : https://www.googleapis.com/auth/spreadsheets
+
+The scope is therefore declared. What protects the user is the flow, not the absence of the
+scope: the side panel asks for per-file authorization first, states plainly that only the open
+spreadsheet is read, and no conversion happens before the user grants it. That authorization
+step is exactly what was missing when you tested the add-on.
 
 **6. Consistency between the listing, the legal pages and the app.** The privacy policy and the
 terms of service described a paid subscription handled by Stripe, an email address collected
@@ -61,14 +69,16 @@ is free, has no account, no payment path, and requests no email scope. Both page
 rewritten to describe the application as it actually behaves. They are live at
 `https://addon.9l9.org/privacy.html` and `https://addon.9l9.org/terms.html`.
 
-**Scopes requested.** The add-on requests two non-sensitive scopes:
+**Scopes requested.** The add-on requests three scopes:
 
 | Scope | Why |
 |---|---|
 | `https://www.googleapis.com/auth/drive.file` | per-file access to the single spreadsheet the user opens the add-on with, or designates in the Picker |
+| `https://www.googleapis.com/auth/spreadsheets` | required by `SpreadsheetApp.openById()`, the only way for a Workspace add-on to read the spreadsheet the user opened it with (see point 5) |
 | `https://www.googleapis.com/auth/script.container.ui` | the add-on menu, side panel and dialogs inside Google Sheets™ |
 
-No sensitive or restricted scope is requested, and the add-on makes no outbound HTTP request
+`spreadsheets` is a sensitive scope; it is already covered by this project's verified OAuth
+consent screen. No restricted scope is requested, and the add-on makes no outbound HTTP request
 at all. No spreadsheet
 data leaves the user's own Google account: the conversion result is written to an `Export_CSV`
 tab inside the user's own spreadsheet, and nothing is stored on our side.
