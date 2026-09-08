@@ -194,6 +194,15 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 - [x] **Autorisation par fichier de bout en bout.** Panneau latéral et web app fonctionnent
       sans jamais demander le scope large `.../auth/spreadsheets`.
 
+## FICHE ENVOYEE POUR EXAMEN — 8 septembre 2026
+
+La console affiche : "Le brouillon est en cours d examen et ne peut pas etre modifie."
+Un bouton "Annuler l examen" permet de revenir en arriere si besoin. Si Google approuve,
+la publication est automatique.
+
+Version du script soumise : **31**. Autorisations declarees : drive.file, spreadsheets,
+script.container.ui, plus userinfo.email et userinfo.profile imposes par Google.
+
 ### Fait le 8 septembre 2026
 
 - [x] **Captures decran remplacees.** La fiche ne montrait quune illustration de robot generee
