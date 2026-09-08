@@ -194,7 +194,16 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 - [x] **Autorisation par fichier de bout en bout.** Panneau latéral et web app fonctionnent
       sans jamais demander le scope large `.../auth/spreadsheets`.
 
-### A reprendre en priorite (7 septembre au soir)
+### Fait le 8 septembre 2026
+
+- [x] **Captures decran remplacees.** La fiche ne montrait quune illustration de robot generee
+      par IA. Deux captures reelles du panneau lateral (1280x800) sont en ligne : lecran
+      dautorisation par fichier, et lecran pret a convertir.
+- [x] **Video corrigee.** La fiche pointait sur une video supprimee de YouTube (wTL1zbp_KQE).
+      Remplacee par gd7Owz-Mpyg, qui existe et montre le produit.
+- [x] **Version du script : 31**, et le scope spreadsheets ajoute aux champs dapplication.
+
+### Historique - a reprendre en priorite (7 septembre au soir)
 
 - [ ] **Renseigner la version 31** dans la fiche SDK : elle indique encore 27, deux deploiements
       en retard. Les correctifs du panneau lateral sont donc invisibles pour la revue.
