@@ -291,18 +291,24 @@ function processSheet(url) {
     const sheetId = extractSheetId(url);
     if (!sheetId) throw new Error('Impossible d\'extraire l\'identifiant du classeur.');
 
-    // Conversion par URL desactivee. Elle rouvrait le classeur choisi dans le
-    // Picker, ce qui exige soit le scope large .../auth/spreadsheets, soit un
-    // appel sortant vers l'API Sheets (scope script.external_request). La
-    // console Marketplace refuse de valider le second et le premier est celui
-    // que la revue Google a demande de retirer. Le module complementaire, lui,
-    // travaille sur le classeur actif : il n'a besoin ni de l'un ni de l'autre.
-    return {
-      success: false,
-      error: 'La conversion par URL est momentanement indisponible.\n\n' +
-             'Ouvrez votre classeur dans Google Sheets\u2122, puis SheetToCsv ' +
-             'dans le panneau lateral : la conversion y fonctionne normalement.'
-    };
+    // Le fichier a ete designe par l'utilisateur dans le Google Picker(TM), ce
+    // qui accorde l'acces par fichier. L'ouverture elle-meme passe par
+    // SpreadsheetApp.openById(), qui exige le scope .../auth/spreadsheets :
+    // Apps Script controle ce scope statiquement, independamment de l'accord
+    // donne fichier par fichier.
+    let spreadsheet;
+    try {
+      spreadsheet = SpreadsheetApp.openById(sheetId);
+    } catch (e) {
+      console.error('Ouverture du classeur refusee :', e.message);
+      return {
+        success: false,
+        error: 'Acces refuse a ce classeur.\n\nVerifiez que vous etes connecte ' +
+               'au bon compte Google et que vous avez bien acces a ce fichier.'
+      };
+    }
+
+    return processSpreadsheet(spreadsheet);
 
   } catch (error) {
     console.error('Erreur processSheet:', error.message);
