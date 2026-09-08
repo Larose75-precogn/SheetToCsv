@@ -168,14 +168,20 @@ function buildTrademarkSection() {
 
 // Conversion depuis la carte du panneau latéral.
 function convertFromCard(e) {
-  const result = convertActiveSpreadsheet();
+  const result = convertActiveSpreadsheet(e);
 
   if (!result.success) {
+    // Sans autorisation par fichier, on renvoie la carte d'autorisation, pas
+    // la carte de conversion : cette derniere ne porte aucun bouton
+    // « Autoriser ce classeur », et l'utilisateur restait bloque devant un
+    // message lui demandant de cliquer sur un bouton absent de l'ecran.
+    const card = result.needsFileScope
+      ? buildAuthorizationCard()
+      : buildReadyCard('<b>Échec de la conversion.</b><br>' + result.error);
+
     return CardService.newActionResponseBuilder()
       .setNotification(CardService.newNotification().setText(result.error))
-      .setNavigation(CardService.newNavigation().updateCard(
-        buildReadyCard('<b>Échec de la conversion.</b><br>' + result.error)
-      ))
+      .setNavigation(CardService.newNavigation().updateCard(card))
       .build();
   }
 
@@ -216,13 +222,40 @@ function convertCurrentSheet() {
 // SheetToCsv sur le fichier ouvert, mais PAS sur une réouverture par
 // identifiant via SpreadsheetApp.openById(), qui échouait avec une erreur
 // d'autorisation.
-function convertActiveSpreadsheet() {
+function convertActiveSpreadsheet(e) {
   let spreadsheet;
-  try {
-    spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  } catch (e) {
-    return buildFileScopeError();
+
+  // Deux contextes d'execution, deux facons d'atteindre le classeur.
+  //
+  // 1. Panneau lateral (module Workspace) : le script n'est lie a aucun
+  //    document, SpreadsheetApp.getActiveSpreadsheet() ne renvoie rien. Google
+  //    transmet l'identifiant du document ouvert dans l'objet d'evenement, et
+  //    c'est par la qu'il faut passer. L'autorisation par fichier accordee via
+  //    requestFileScopeForActiveDocument() couvre l'ouverture de ce seul
+  //    fichier : aucun scope large n'est necessaire.
+  //
+  // 2. Menu SheetToCsv de la feuille : la, le script s'execute bien dans le
+  //    contexte du classeur, et getActiveSpreadsheet() est la bonne methode.
+  const sheetsEvent = e && e.sheets;
+
+  if (sheetsEvent && sheetsEvent.id) {
+    if (sheetsEvent.addonHasFileScopePermission === false) {
+      return buildFileScopeError();
+    }
+    try {
+      spreadsheet = SpreadsheetApp.openById(sheetsEvent.id);
+    } catch (err) {
+      console.error('Ouverture par identifiant refusee :', err.message);
+      return buildFileScopeError();
+    }
+  } else {
+    try {
+      spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (err) {
+      return buildFileScopeError();
+    }
   }
+
   if (!spreadsheet) return buildFileScopeError();
 
   return processSpreadsheet(spreadsheet);
@@ -231,8 +264,11 @@ function convertActiveSpreadsheet() {
 function buildFileScopeError() {
   return {
     success: false,
-    error: 'SheetToCsv n\'a pas encore accès à ce classeur. Ouvrez le panneau ' +
-           'SheetToCsv puis cliquez sur « Autoriser ce classeur ».'
+    // Distingue ce cas des autres echecs : lui seul se resout par le bouton
+    // d'autorisation, et la carte renvoyee doit donc etre celle qui le porte.
+    needsFileScope: true,
+    error: 'SheetToCsv n\'a pas encore accès à ce classeur. ' +
+           'Cliquez sur « Autoriser ce classeur » ci-dessous.'
   };
 }
 

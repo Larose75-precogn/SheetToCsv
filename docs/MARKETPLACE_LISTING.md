@@ -179,12 +179,12 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
 
 ## 6. Points restants côté console (hors dépôt)
 
-État au 7 septembre 2026. Le code est déployé en **version 27** sur le déploiement
+État au 7 septembre 2026. Le code est déployé en **version 29** sur le déploiement
 `AKfycbwAB9uJ17VdmnIuXV9Fc1ClORI4QWOe-hfYhUvjpGX36CZIrEEvL3-5OnocHtYEB75c`.
 
 ### Fait
 
-- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 27.
+- [x] **Déploiement du script.** `clasp push` + nouveau déploiement, version 29.
       L'ancienne version en ligne datait de juillet et ne contenait aucun des correctifs.
 - [x] **Icônes servies publiquement.** `https://addon.9l9.org/assets/icons/` répond ; le
       `logoUrl` du manifeste pointait auparavant vers une URL en 404.
@@ -193,6 +193,18 @@ Référence : https://developers.google.com/workspace/marketplace/terms/branding
       aucun. Les deux pages sont publiées.
 - [x] **Autorisation par fichier de bout en bout.** Panneau latéral et web app fonctionnent
       sans jamais demander le scope large `.../auth/spreadsheets`.
+
+### A reprendre en priorite (7 septembre au soir)
+
+- [ ] **Renseigner la version 29** dans la fiche SDK : elle indique encore 27, deux deploiements
+      en retard. Les correctifs du panneau lateral sont donc invisibles pour la revue.
+- [ ] **Verifier la conversion depuis le panneau lateral.** Le correctif de fond vient d ete
+      deploye et n a pas encore ete teste en vrai.
+- [ ] **Remplacer la capture d ecran de la fiche.** Elle montre une illustration de robot
+      generee par IA, pas l application. Motif de refus certain.
+- [ ] **Remplacer ou retirer la video.** Celle referencee dans la fiche est supprimee de
+      YouTube. La nouvelle (gd7Owz-Mpyg) est vivante mais demontre la conversion par URL de la
+      web app, qui a ete desactivee : elle montre une fonction qui n existe plus.
 
 ### À faire dans la console
 
